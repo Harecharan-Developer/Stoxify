@@ -165,6 +165,169 @@ exports.getUserTransactions = async (req, res) => {
   res.json(rows);
 };
 
+
+exports.getUserPortfolio = async (req, res) => {
+  const db = require('../db/config');
+  const { userId } = req.params;
+
+  // Get stock holding summary
+  const [holdings] = await db.execute(
+    `SELECT t.stock_id, s.company_name, s.current_sprice,
+            SUM(CASE WHEN t.type = 'BUY' THEN t.quantity ELSE -t.quantity END) AS quantity
+     FROM transactions t
+     JOIN stockdata s ON t.stock_id = s.stock_id
+     WHERE t.user_id = ?
+     GROUP BY t.stock_id
+     HAVING quantity > 0`,
+    [userId]
+  );
+
+  // Get total investment per stock (buy)
+  const [buyHistory] = await db.execute(
+    `SELECT stock_id, SUM(quantity * price_at_transaction) AS total_investment
+     FROM transactions
+     WHERE user_id = ? AND type = 'BUY'
+     GROUP BY stock_id`,
+    [userId]
+  );
+
+  // Get total earnings per stock (sell)
+  const [sellHistory] = await db.execute(
+    `SELECT stock_id, SUM(quantity * price_at_transaction) AS total_earnings
+     FROM transactions
+     WHERE user_id = ? AND type = 'SELL'
+     GROUP BY stock_id`,
+    [userId]
+  );
+
+  const buyMap = Object.fromEntries(buyHistory.map(b => [b.stock_id, b]));
+  const sellMap = Object.fromEntries(sellHistory.map(s => [s.stock_id, s]));
+
+  const portfolio = holdings.map(h => {
+    const buy = buyMap[h.stock_id] || { total_investment: 0 };
+    const sell = sellMap[h.stock_id] || { total_earnings: 0 };
+
+    const currentValue = h.quantity * h.current_sprice;
+    const netInvestment = buy.total_investment - sell.total_earnings;
+    const profitLoss = currentValue - netInvestment;
+
+    return {
+      stock_id: h.stock_id,
+      company_name: h.company_name,
+      quantity: h.quantity,
+      current_price: h.current_sprice,
+      current_value: currentValue,
+      net_investment: netInvestment,
+      profit_loss: profitLoss
+    };
+  });
+
+  res.json(portfolio);
+};
+
+
+
+
+// GTT ORDERS
+exports.createGTTOrder = async (req, res) => {
+  const db = require('../db/config');
+  const { user_id, stock_id, target_price, action, quantity } = req.body;
+
+  // Validation: Check for undefined or null fields
+  if (
+    user_id === undefined || stock_id === undefined ||
+    target_price === undefined || action === undefined || quantity === undefined
+  ) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
+
+  try {
+    await db.execute(
+      'INSERT INTO gtt_orders (user_id, stock_id, target_price, action, quantity) VALUES (?, ?, ?, ?, ?)',
+      [user_id, stock_id, target_price, action, quantity]
+    );
+    res.json({ success: true });
+  } catch (err) {
+    console.error('GTT Insert Error:', err);
+    res.status(500).json({ error: 'Database insert failed' });
+  }
+};
+
+
+exports.getGTTOrders = async (req, res) => {
+  const db = require('../db/config');
+  const { userId } = req.params;
+const [rows] = await db.execute('SELECT * FROM gtt_orders WHERE user_id = ?', [userId]);
+res.json(rows);
+};
+
+exports.deleteGTTOrder = async (req, res) => {
+  const db = require('../db/config');
+  const { gtt_id } = req.body;
+await db.execute('DELETE FROM gtt_orders WHERE gtt_id = ?', [gtt_id]);
+res.json({ success: true });
+};
+
+
+
+
+// WATCHLIST
+exports.getWatchlist = async (req, res) => {
+  const db = require('../db/config');
+  const { userId } = req.params;
+const [rows] = await db.execute(
+  'SELECT s.* FROM stockdata s JOIN watchlist w ON s.stock_id = w.stock_id WHERE w.user_id = ?',
+  [userId]
+);
+res.json(rows);
+};
+
+exports.addToWatchlist = async (req, res) => {
+  const db = require('../db/config');
+  const { user_id, stock_id } = req.body;
+await db.execute(
+  'INSERT IGNORE INTO watchlist (user_id, stock_id) VALUES (?, ?)',
+  [user_id, stock_id]
+);
+res.json({ success: true });
+};
+
+exports.removeFromWatchlist = async (req, res) => {
+  const db = require('../db/config');
+  const { user_id, stock_id } = req.body;
+await db.execute('DELETE FROM watchlist WHERE user_id = ? AND stock_id = ?', [user_id, stock_id]);
+res.json({ success: true });
+};
+
+// WATCHLIST
+exports.getWatchlist = async (req, res) => {
+  const db = require('../db/config');
+  const { userId } = req.params;
+const [rows] = await db.execute(
+  'SELECT s.* FROM stockdata s JOIN watchlist w ON s.stock_id = w.stock_id WHERE w.user_id = ?',
+  [userId]
+);
+res.json(rows);
+};
+
+exports.addToWatchlist = async (req, res) => {
+  const db = require('../db/config');
+  const { user_id, stock_id } = req.body;
+await db.execute(
+  'INSERT IGNORE INTO watchlist (user_id, stock_id) VALUES (?, ?)',
+  [user_id, stock_id]
+);
+res.json({ success: true });
+};
+
+exports.removeFromWatchlist = async (req, res) => {
+  const db = require('../db/config');
+  const { user_id, stock_id } = req.body;
+await db.execute('DELETE FROM watchlist WHERE user_id = ? AND stock_id = ?', [user_id, stock_id]);
+res.json({ success: true });
+};
+
+
 // // PORTFOLIO + P/L
 // exports.getUserPortfolio = async (req, res) => {
 //     const db = require('../db/config');

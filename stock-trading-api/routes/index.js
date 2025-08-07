@@ -20,6 +20,14 @@ router.post('/buy', controller.buyStock);
 router.post('/sell', controller.sellStock);
 
 // Watchlist
+router.get('/watchlist/:userId', controller.getWatchlist);
+router.post('/watchlist/add', controller.addToWatchlist);
+router.post('/watchlist/remove', controller.removeFromWatchlist);
+
+// GTT Orders
+router.post('/gtt', controller.createGTTOrder);
+router.get('/gtt/:userId', controller.getGTTOrders);
+router.post('/gtt/delete', controller.deleteGTTOrder);
 
 
 // Transactions
