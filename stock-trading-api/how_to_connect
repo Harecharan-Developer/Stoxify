@@ -1,0 +1,25 @@
+✅ Option 1: Use a MySQL GUI tool (like DBeaver or MySQL Workbench)
+This is the easiest and most visual method.
+
+🔧 Steps:
+Download & install DBeaver (or MySQL Workbench).
+
+Create a new MySQL connection:
+
+Host: b9cvszcfmrqiyhakjqwp-mysql.services.clever-cloud.com
+
+Port: 3306
+
+Username: unajn99ivqxt4i2e
+
+Password: 
+
+Database name: b9cvszcfmrqiyhakjqwp
+
+Connect.
+
+Open a new SQL editor inside DBeaver.
+
+Paste your CREATE TABLE queries and run them.
+
+💡 You’ll be able to browse your DB schema and manage it visually.
