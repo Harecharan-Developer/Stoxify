@@ -10,6 +10,8 @@ router.post('/login', controller.loginUser);
 
 //updateWalletBalance
 router.post('/update-balance', controller.updateWalletBalanceHandler);
+//get Wallet Balance
+router.get('/wallet/:userId', controller.getWalletBalance);
 
 // Stock Data
 router.get('/stocks', controller.getAllStocks);

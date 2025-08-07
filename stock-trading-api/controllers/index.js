@@ -50,6 +50,29 @@ exports.updateWalletBalance = async (userId, amount) => {
     }
 };
 
+
+////get Wallet Balance
+// router.get('/wallet/:userId', controller.getWalletBalance);
+exports.getWalletBalance = async (req, res) => {
+    const db = require('../db/config'); 
+    const { userId } = req.params;
+    try { 
+
+
+        const [rows] = await db.execute('SELECT balance FROM users WHERE user_id = ?', [userId]);
+        if (rows.length === 0) {  
+            return res.status(404).json({ error: 'User not found' });
+        } 
+        res.json({ balance: rows[0].balance });
+    } catch (error) { 
+        console.error('Error fetching wallet balance:', error);
+        res.status(500).json({ error: 'Database error fetching wallet balance' });
+    }
+};
+
+
+
+
 exports.updateWalletBalanceHandler = async (req, res) => {
     const { user_id, amount } = req.body;
 
