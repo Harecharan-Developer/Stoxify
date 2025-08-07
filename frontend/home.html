@@ -1,0 +1,1541 @@
+homepage
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>STOXIFY - Portfolio Management</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --success-color: #28a745;
+      --danger-color: #dc3545;
+      --warning-color: #ffc107;
+      --info-color: #17a2b8;
+      --dark-bg: #1a1a2e;
+      --card-bg: rgba(255, 255, 255, 0.95);
+      --text-dark: #2c3e50;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: var(--primary-gradient);
+      min-height: 100vh;
+      color: var(--text-dark);
+    }
+
+    .navbar-custom {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+      padding: 1rem 0;
+    }
+
+    .navbar-brand {
+      font-weight: 700;
+      font-size: 1.5rem;
+      color: var(--text-dark) !important;
+    }
+
+    .logo-icon {
+      background: var(--primary-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-size: 2rem;
+      margin-right: 0.5rem;
+    }
+
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--primary-gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+
+    .user-avatar:hover {
+      transform: scale(1.1);
+    }
+
+    .main-container {
+      padding: 2rem 0;
+      min-height: calc(100vh - 80px);
+    }
+
+    .stats-card {
+      background: var(--card-bg);
+      border-radius: 15px;
+      padding: 1.5rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+      border: none;
+      margin-bottom: 1.5rem;
+    }
+
+    .stats-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .stats-icon {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .stats-value {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .stats-label {
+      color: #6c757d;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .tab-content-card {
+      background: var(--card-bg);
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+
+    .nav-tabs .nav-link {
+      border: none;
+      border-radius: 10px 10px 0 0;
+      color: var(--text-dark);
+      font-weight: 600;
+      padding: 1rem 1.5rem;
+      margin-right: 0.5rem;
+      background: rgba(255, 255, 255, 0.7);
+      transition: all 0.3s ease;
+    }
+
+    .nav-tabs .nav-link.active {
+      background: var(--card-bg);
+      color: var(--text-dark);
+      box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .nav-tabs .nav-link:hover {
+      background: rgba(255, 255, 255, 0.9);
+    }
+
+    .table-container {
+      padding: 2rem;
+      overflow-x: auto;
+    }
+
+    .table-modern {
+      border: none;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    }
+
+    .table-modern thead {
+      background: var(--primary-gradient);
+      color: white;
+    }
+
+    .table-modern th {
+      border: none;
+      padding: 1rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.85rem;
+      letter-spacing: 1px;
+    }
+
+    .table-modern td {
+      border: none;
+      padding: 1rem;
+      vertical-align: middle;
+      background: white;
+      transition: background-color 0.3s ease;
+    }
+
+    .table-modern tbody tr:hover td {
+      background-color: #f8f9fa;
+    }
+
+    .btn-action {
+      border: none;
+      border-radius: 8px;
+      padding: 0.5rem 1rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.8rem;
+      letter-spacing: 1px;
+      transition: all 0.3s ease;
+      margin: 0 0.2rem;
+    }
+
+    .btn-buy {
+      background: linear-gradient(135deg, #28a745, #20c997);
+      color: white;
+    }
+
+    .btn-buy:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+      color: white;
+    }
+
+    .btn-sell {
+      background: linear-gradient(135deg, #dc3545, #fd7e14);
+      color: white;
+    }
+
+    .btn-sell:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(220, 53, 69, 0.4);
+      color: white;
+    }
+
+    .btn-watchlist {
+      background: linear-gradient(135deg, #17a2b8, #6610f2);
+      color: white;
+      border-radius: 50%;
+      width: 35px;
+      height: 35px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+    }
+
+    .btn-watchlist:hover {
+      transform: scale(1.1);
+      color: white;
+    }
+
+    .btn-watchlist.active {
+      background: linear-gradient(135deg, #ffc107, #fd7e14);
+    }
+
+    .price-positive {
+      color: var(--success-color);
+      font-weight: 600;
+    }
+
+    .price-negative {
+      color: var(--danger-color);
+      font-weight: 600;
+    }
+
+    .stock-symbol {
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: var(--text-dark);
+      text-transform: uppercase;
+    }
+
+    .stock-name {
+      color: #6c757d;
+      font-size: 0.8rem;
+      margin-top: 0.2rem;
+    }
+
+    .modal-content {
+      border-radius: 15px;
+      border: none;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+
+    .modal-header {
+      background: var(--primary-gradient);
+      color: white;
+      border-radius: 15px 15px 0 0;
+      border: none;
+    }
+
+    .quantity-input {
+      text-align: center;
+      font-size: 1.2rem;
+      font-weight: 600;
+      border: 2px solid #e9ecef;
+      border-radius: 10px;
+      padding: 0.75rem;
+    }
+
+    .quantity-input:focus {
+      border-color: #667eea;
+      box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    }
+
+    .quantity-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 1rem 0;
+    }
+
+    .quantity-btn {
+      background: var(--primary-gradient);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      transition: all 0.3s ease;
+    }
+
+    .quantity-btn:hover {
+      transform: scale(1.1);
+      color: white;
+    }
+
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem;
+    }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #667eea;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .alert-custom {
+      border: none;
+      border-radius: 10px;
+      padding: 1rem 1.5rem;
+      margin: 1rem 0;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 3rem;
+      color: #6c757d;
+    }
+
+    .empty-state i {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      opacity: 0.3;
+    }
+
+    @media (max-width: 768px) {
+      .stats-card {
+        margin-bottom: 1rem;
+      }
+      
+      .table-container {
+        padding: 1rem;
+      }
+      
+      .btn-action {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.7rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-custom fixed-top">
+    <div class="container">
+      <a class="navbar-brand" href="#">
+        <i class="fas fa-chart-line logo-icon"></i>
+        STOXIFY
+      </a>
+      <div class="d-flex align-items-center">
+        <div class="me-3 text-end d-none d-md-block">
+          <div class="fw-bold" id="userBalance">₹0</div>
+          <small class="text-muted">Available Balance</small>
+        </div>
+        <div class="dropdown">
+          <div class="user-avatar" data-bs-toggle="dropdown" id="userAvatar">
+            <i class="fas fa-user"></i>
+          </div>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li><a class="dropdown-item" href="#" id="profileOption"><i class="fas fa-user me-2"></i>Profile</a></li>
+            <li><a class="dropdown-item" href="#" onclick="updateBalance()"><i class="fas fa-wallet me-2"></i>Add Money</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item text-danger" href="#" onclick="logout()"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Container -->
+  <div class="main-container">
+    <div class="container" style="margin-top: 80px;">
+      
+      <!-- Stats Cards -->
+      <div class="row mb-4" id="statsSection">
+        <div class="col-md-3 col-sm-6">
+          <div class="stats-card text-center">
+            <i class="fas fa-wallet stats-icon text-primary"></i>
+            <div class="stats-value text-primary" id="totalBalance">₹0</div>
+            <div class="stats-label">Total Balance</div>
+          </div>
+        </div>
+        <div class="col-md-3 col-sm-6">
+          <div class="stats-card text-center">
+            <i class="fas fa-chart-line stats-icon text-success"></i>
+            <div class="stats-value text-success" id="portfolioValue">₹0</div>
+            <div class="stats-label">Portfolio Value</div>
+          </div>
+        </div>
+        <div class="col-md-3 col-sm-6">
+          <div class="stats-card text-center">
+            <i class="fas fa-trophy stats-icon text-warning"></i>
+            <div class="stats-value text-warning" id="totalProfitLoss">₹0</div>
+            <div class="stats-label">Total P&L</div>
+          </div>
+        </div>
+        <div class="col-md-3 col-sm-6">
+          <div class="stats-card text-center">
+            <i class="fas fa-eye stats-icon text-info"></i>
+            <div class="stats-value text-info" id="watchlistCount">0</div>
+            <div class="stats-label">Watchlist</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Content Tabs -->
+      <div class="row">
+        <div class="col-12">
+          <ul class="nav nav-tabs" id="mainTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" id="stocks-tab" data-bs-toggle="tab" data-bs-target="#stocks" type="button" role="tab">
+                <i class="fas fa-chart-bar me-2"></i>All Stocks
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="portfolio-tab" data-bs-toggle="tab" data-bs-target="#portfolio" type="button" role="tab">
+                <i class="fas fa-briefcase me-2"></i>My Portfolio
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="watchlist-tab" data-bs-toggle="tab" data-bs-target="#watchlist" type="button" role="tab">
+                <i class="fas fa-star me-2"></i>Watchlist
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="transactions-tab" data-bs-toggle="tab" data-bs-target="#transactions" type="button" role="tab">
+                <i class="fas fa-history me-2"></i>Transactions
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="gtt-tab" data-bs-toggle="tab" data-bs-target="#gtt" type="button" role="tab">
+                <i class="fas fa-clock me-2"></i>GTT Orders
+              </button>
+            </li>
+          </ul>
+
+          <div class="tab-content-card">
+            <div class="tab-content" id="mainTabContent">
+              
+              <!-- All Stocks Tab -->
+              <div class="tab-pane fade show active" id="stocks" role="tabpanel">
+                <div class="table-container">
+                  <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>All Stocks</h5>
+                    <button class="btn btn-outline-primary" onclick="loadAllStocks()">
+                      <i class="fas fa-refresh me-2"></i>Refresh
+                    </button>
+                  </div>
+                  <div id="stocksContent">
+                    <div class="loading">
+                      <div class="spinner"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Portfolio Tab -->
+              <div class="tab-pane fade" id="portfolio" role="tabpanel">
+                <div class="table-container">
+                  <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="mb-0"><i class="fas fa-briefcase me-2"></i>My Portfolio</h5>
+                    <button class="btn btn-outline-primary" onclick="loadPortfolio()">
+                      <i class="fas fa-refresh me-2"></i>Refresh
+                    </button>
+                  </div>
+                  <div id="portfolioContent">
+                    <div class="loading">
+                      <div class="spinner"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Watchlist Tab -->
+              <div class="tab-pane fade" id="watchlist" role="tabpanel">
+                <div class="table-container">
+                  <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="mb-0"><i class="fas fa-star me-2"></i>My Watchlist</h5>
+                    <button class="btn btn-outline-primary" onclick="loadWatchlist()">
+                      <i class="fas fa-refresh me-2"></i>Refresh
+                    </button>
+                  </div>
+                  <div id="watchlistContent">
+                    <div class="loading">
+                      <div class="spinner"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Transactions Tab -->
+              <div class="tab-pane fade" id="transactions" role="tabpanel">
+                <div class="table-container">
+                  <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="mb-0"><i class="fas fa-history me-2"></i>Transaction History</h5>
+                    <button class="btn btn-outline-primary" onclick="loadTransactions()">
+                      <i class="fas fa-refresh me-2"></i>Refresh
+                    </button>
+                  </div>
+                  <div id="transactionsContent">
+                    <div class="loading">
+                      <div class="spinner"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- GTT Orders Tab -->
+              <div class="tab-pane fade" id="gtt" role="tabpanel">
+                <div class="table-container">
+                  <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="mb-0"><i class="fas fa-clock me-2"></i>GTT Orders</h5>
+                    <button class="btn btn-outline-primary" onclick="loadGTTOrders()">
+                      <i class="fas fa-refresh me-2"></i>Refresh
+                    </button>
+                  </div>
+                  <div id="gttContent">
+                    <div class="loading">
+                      <div class="spinner"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Trade Modal -->
+  <div class="modal fade" id="tradeModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="tradeModalTitle">
+            <i class="fas fa-chart-line me-2"></i>Trade Stock
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div id="tradeModalContent">
+            <div class="text-center mb-4">
+              <h4 id="tradeStockName" class="stock-symbol">STOCK</h4>
+              <p id="tradeStockPrice" class="text-muted">Current Price: ₹0</p>
+            </div>
+            
+            <div class="mb-4">
+              <label class="form-label fw-bold">Quantity</label>
+              <div class="quantity-controls">
+                <button type="button" class="quantity-btn" onclick="updateQuantity(-1)">
+                  <i class="fas fa-minus"></i>
+                </button>
+                <input type="number" class="form-control quantity-input" id="tradeQuantity" value="1" min="1">
+                <button type="button" class="quantity-btn" onclick="updateQuantity(1)">
+                  <i class="fas fa-plus"></i>
+                </button>
+              </div>
+            </div>
+            
+            <div class="mb-4">
+              <div class="d-flex justify-content-between">
+                <span class="fw-bold">Total Amount:</span>
+                <span class="fw-bold text-primary" id="totalAmount">₹0</span>
+              </div>
+            </div>
+            
+            <div id="availableInfo" class="alert alert-info alert-custom mb-4">
+              <i class="fas fa-info-circle me-2"></i>
+              <span id="availableText">Available Balance: ₹0</span>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn" id="confirmTradeBtn" onclick="confirmTrade()">
+            <i class="fas fa-check me-2"></i>Confirm
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GTT Modal -->
+  <div class="modal fade" id="gttModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            <i class="fas fa-clock me-2"></i>Create GTT Order
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <form id="gttForm">
+            <div class="mb-3">
+              <label class="form-label">Stock</label>
+              <select class="form-select" id="gttStockSelect" required>
+                <option value="">Select Stock</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Action</label>
+              <select class="form-select" id="gttAction" required>
+                <option value="">Select Action</option>
+                <option value="BUY">Buy</option>
+                <option value="SELL">Sell</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Target Price</label>
+              <input type="number" class="form-control" id="gttTargetPrice" step="0.01" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Quantity</label>
+              <input type="number" class="form-control" id="gttQuantity" min="1" required>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary" onclick="createGTTOrder()">
+            <i class="fas fa-plus me-2"></i>Create Order
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Global variables
+    let currentUser = null;
+    let currentStocks = [];
+    let userWatchlist = [];
+    let userPortfolio = [];
+    let currentTradeData = {};
+
+    // API Configuration
+    const API_BASE = '/api';
+
+    // Initialize application
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('DOM loaded, initializing app...');
+      
+      // Prevent multiple initializations
+      if (window.appInitialized) {
+        console.log('App already initialized, skipping...');
+        return;
+      }
+      window.appInitialized = true;
+      
+      // Check if we're already on the login page to prevent redirect loops
+      if (window.location.pathname.includes('login.html')) {
+        console.log('Already on login page, skipping session check');
+        return;
+      }
+      
+      const sessionValid = checkUserSession();
+      if (sessionValid) {
+        initializeEventListeners();
+      }
+    });
+
+    function checkUserSession() {
+      const userId = sessionStorage.getItem('userId');
+      const username = sessionStorage.getItem('username');
+      
+      console.log('Checking session - userId:', userId, 'username:', username);
+      
+      if (!userId || !username) {
+        console.log('No valid session found, redirecting to login');
+        // Add a small delay to prevent immediate redirect loops
+        setTimeout(() => {
+          window.location.href = 'login.html';
+        }, 100);
+        return false;
+      }
+      
+      currentUser = {
+        id: userId,
+        username: username
+      };
+      
+      console.log('Session valid, loading dashboard for user:', currentUser);
+      updateUserInterface();
+      loadDashboardData();
+      return true;
+    }
+
+    function updateUserInterface() {
+      if (currentUser) {
+        document.getElementById('userAvatar').innerHTML = currentUser.username.charAt(0).toUpperCase();
+      }
+    }
+
+    function loadDashboardData() {
+      console.log('Loading dashboard data...');
+      try {
+        loadAllStocks();
+        loadUserBalance();
+        loadPortfolioStats();
+        loadWatchlistCount();
+      } catch (error) {
+        console.error('Error loading dashboard data:', error);
+        showAlert('Error loading dashboard data', 'error');
+      }
+    }
+
+    async function loadUserBalance() {
+      try {
+        console.log('Loading user balance...');
+        
+        // For demo purposes, set a default balance first
+        const defaultBalance = 50000;
+        document.getElementById('userBalance').textContent = `₹${defaultBalance.toLocaleString()}`;
+        document.getElementById('totalBalance').textContent = `₹${defaultBalance.toLocaleString()}`;
+        
+        // Then try to load real data
+        const [portfolioResponse, transactionsResponse] = await Promise.allSettled([
+          fetch(`${API_BASE}/portfolio/${currentUser.id}`),
+          fetch(`${API_BASE}/transactions/${currentUser.id}`)
+        ]);
+        
+        let portfolioValue = 0;
+        let totalPL = 0;
+        
+        if (portfolioResponse.status === 'fulfilled' && portfolioResponse.value.ok) {
+          const portfolio = await portfolioResponse.value.json();
+          if (Array.isArray(portfolio)) {
+            portfolio.forEach(holding => {
+              portfolioValue += (holding.quantity || 0) * (holding.current_price || 0);
+            });
+          }
+        }
+        
+        if (transactionsResponse.status === 'fulfilled' && transactionsResponse.value.ok) {
+          const transactions = await transactionsResponse.value.json();
+          if (Array.isArray(transactions)) {
+            transactions.forEach(tx => {
+              if (tx.type === 'SELL' && tx.profit_loss) {
+                totalPL += parseFloat(tx.profit_loss);
+              }
+            });
+          }
+        }
+        
+        document.getElementById('portfolioValue').textContent = `₹${portfolioValue.toLocaleString()}`;
+        document.getElementById('totalProfitLoss').textContent = `₹${totalPL.toLocaleString()}`;
+        document.getElementById('totalProfitLoss').className = `stats-value ${totalPL >= 0 ? 'text-success' : 'text-danger'}`;
+        
+        console.log('User balance loaded successfully');
+      } catch (error) {
+        console.error('Error loading user balance:', error);
+        // Don't show error to user for balance loading failure
+      }
+    }
+
+    async function loadPortfolioStats() {
+      try {
+        const response = await fetch(`${API_BASE}/portfolio/${currentUser.id}`);
+        if (response.ok) {
+          const portfolio = await response.json();
+          userPortfolio = Array.isArray(portfolio) ? portfolio : [];
+        }
+      } catch (error) {
+        console.error('Error loading portfolio stats:', error);
+      }
+    }
+
+    async function loadWatchlistCount() {
+      try {
+        const response = await fetch(`${API_BASE}/watchlist/${currentUser.id}`);
+        if (response.ok) {
+          const watchlist = await response.json();
+          const count = Array.isArray(watchlist) ? watchlist.length : 0;
+          document.getElementById('watchlistCount').textContent = count;
+          userWatchlist = Array.isArray(watchlist) ? watchlist : [];
+        }
+      } catch (error) {
+        console.error('Error loading watchlist count:', error);
+      }
+    }
+
+    async function loadAllStocks() {
+      try {
+        showLoading('stocksContent');
+        const response = await fetch(`${API_BASE}/stocks`);
+        
+        if (response.ok) {
+          const stocks = await response.json();
+          currentStocks = Array.isArray(stocks) ? stocks : [];
+          renderStocksTable();
+        } else {
+          showError('stocksContent', 'Failed to load stocks');
+        }
+      } catch (error) {
+        console.error('Error loading stocks:', error);
+        showError('stocksContent', 'Error loading stocks');
+      }
+    }
+
+    function renderStocksTable() {
+      const container = document.getElementById('stocksContent');
+      
+      if (currentStocks.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <i class="fas fa-chart-line"></i>
+            <h4>No Stocks Available</h4>
+            <p>Stocks will appear here when they are loaded.</p>
+          </div>
+        `;
+        return;
+      }
+
+      const tableHTML = `
+        <table class="table table-modern">
+          <thead>
+            <tr>
+              <th>Stock</th>
+              <th>Current Price</th>
+              <th>Day High</th>
+              <th>Day Low</th>
+              <th>Watchlist</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${currentStocks.map(stock => `
+              <tr>
+                <td>
+                  <div class="stock-symbol">${stock.ticker || stock.symbol || 'N/A'}</div>
+                  <div class="stock-name">${stock.name || stock.company_name || 'Unknown'}</div>
+                </td>
+                <td class="price-positive">₹${(stock.price || stock.current_price || 0).toLocaleString()}</td>
+                <td>₹${(stock.day_high || stock.high || 0).toLocaleString()}</td>
+                <td>₹${(stock.day_low || stock.low || 0).toLocaleString()}</td>
+                <td>
+                  <button class="btn btn-watchlist ${isInWatchlist(stock.id) ? 'active' : ''}" 
+                          onclick="toggleWatchlist(${stock.id}, '${stock.name || stock.company_name}')">
+                    <i class="fas ${isInWatchlist(stock.id) ? 'fa-star' : 'fa-star-o'}"></i>
+                  </button>
+                </td>
+                <td>
+                  <button class="btn btn-action btn-buy" onclick="openTradeModal(${stock.id}, 'BUY')">
+                    <i class="fas fa-arrow-up me-1"></i>Buy
+                  </button>
+                  <button class="btn btn-action btn-sell" onclick="openTradeModal(${stock.id}, 'SELL')">
+                    <i class="fas fa-arrow-down me-1"></i>Sell
+                  </button>
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+
+      container.innerHTML = tableHTML;
+    }
+
+    async function loadPortfolio() {
+      try {
+        showLoading('portfolioContent');
+        const response = await fetch(`${API_BASE}/portfolio/${currentUser.id}`);
+        
+        if (response.ok) {
+          const portfolio = await response.json();
+          userPortfolio = Array.isArray(portfolio) ? portfolio : [];
+          renderPortfolioTable();
+        } else {
+          showError('portfolioContent', 'Failed to load portfolio');
+        }
+      } catch (error) {
+        console.error('Error loading portfolio:', error);
+        showError('portfolioContent', 'Error loading portfolio');
+      }
+    }
+
+    function renderPortfolioTable() {
+      const container = document.getElementById('portfolioContent');
+      
+      if (userPortfolio.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <i class="fas fa-briefcase"></i>
+            <h4>No Holdings</h4>
+            <p>Your portfolio holdings will appear here after you make purchases.</p>
+          </div>
+        `;
+        return;
+      }
+
+      const tableHTML = `
+        <table class="table table-modern">
+          <thead>
+            <tr>
+              <th>Stock</th>
+              <th>Quantity</th>
+              <th>Avg. Price</th>
+              <th>Current Price</th>
+              <th>Value</th>
+              <th>P&L</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${userPortfolio.map(holding => {
+              const currentValue = (holding.quantity || 0) * (holding.current_price || 0);
+              const totalCost = (holding.quantity || 0) * (holding.avg_price || 0);
+              const pnl = currentValue - totalCost;
+              const pnlPercent = totalCost > 0 ? ((pnl / totalCost) * 100) : 0;
+              
+              return `
+                <tr>
+                  <td>
+                    <div class="stock-symbol">${holding.ticker || holding.symbol || 'N/A'}</div>
+                    <div class="stock-name">${holding.stock_name || 'Unknown'}</div>
+                  </td>
+                  <td class="fw-bold">${holding.quantity || 0}</td>
+                  <td>₹${(holding.avg_price || 0).toLocaleString()}</td>
+                  <td>₹${(holding.current_price || 0).toLocaleString()}</td>
+                  <td class="fw-bold">₹${currentValue.toLocaleString()}</td>
+                  <td class="${pnl >= 0 ? 'price-positive' : 'price-negative'}">
+                    ₹${pnl.toLocaleString()} (${pnlPercent.toFixed(2)}%)
+                  </td>
+                  <td>
+                    <button class="btn btn-action btn-sell" onclick="openTradeModal(${holding.stock_id}, 'SELL')">
+                      <i class="fas fa-arrow-down me-1"></i>Sell
+                    </button>
+                  </td>
+                </tr>
+              `;
+            }).join('')}
+          </tbody>
+        </table>
+      `;
+
+      container.innerHTML = tableHTML;
+    }
+
+    async function loadWatchlist() {
+      try {
+        showLoading('watchlistContent');
+        const response = await fetch(`${API_BASE}/watchlist/${currentUser.id}`);
+        
+        if (response.ok) {
+          const watchlist = await response.json();
+          userWatchlist = Array.isArray(watchlist) ? watchlist : [];
+          renderWatchlistTable();
+        } else {
+          showError('watchlistContent', 'Failed to load watchlist');
+        }
+      } catch (error) {
+        console.error('Error loading watchlist:', error);
+        showError('watchlistContent', 'Error loading watchlist');
+      }
+    }
+
+    function renderWatchlistTable() {
+      const container = document.getElementById('watchlistContent');
+      
+      if (userWatchlist.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <i class="fas fa-star"></i>
+            <h4>No Watchlist Items</h4>
+            <p>Add stocks to your watchlist to track them here.</p>
+          </div>
+        `;
+        return;
+      }
+
+      const tableHTML = `
+        <table class="table table-modern">
+          <thead>
+            <tr>
+              <th>Stock</th>
+              <th>Current Price</th>
+              <th>Day High</th>
+              <th>Day Low</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${userWatchlist.map(item => `
+              <tr>
+                <td>
+                  <div class="stock-symbol">${item.ticker || item.symbol || 'N/A'}</div>
+                  <div class="stock-name">${item.stock_name || 'Unknown'}</div>
+                </td>
+                <td class="price-positive">₹${(item.current_price || 0).toLocaleString()}</td>
+                <td>₹${(item.day_high || 0).toLocaleString()}</td>
+                <td>₹${(item.day_low || 0).toLocaleString()}</td>
+                <td>
+                  <button class="btn btn-action btn-buy" onclick="openTradeModal(${item.stock_id}, 'BUY')">
+                    <i class="fas fa-arrow-up me-1"></i>Buy
+                  </button>
+                  <button class="btn btn-action btn-sell" onclick="openTradeModal(${item.stock_id}, 'SELL')">
+                    <i class="fas fa-arrow-down me-1"></i>Sell
+                  </button>
+                  <button class="btn btn-action" style="background: linear-gradient(135deg, #dc3545, #fd7e14); color: white;" 
+                          onclick="removeFromWatchlist(${item.stock_id})">
+                    <i class="fas fa-trash me-1"></i>Remove
+                  </button>
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+
+      container.innerHTML = tableHTML;
+    }
+
+    async function loadTransactions() {
+      try {
+        showLoading('transactionsContent');
+        const response = await fetch(`${API_BASE}/transactions/${currentUser.id}`);
+        
+        if (response.ok) {
+          const transactions = await response.json();
+          const transactionsList = Array.isArray(transactions) ? transactions : [];
+          renderTransactionsTable(transactionsList);
+        } else {
+          showError('transactionsContent', 'Failed to load transactions');
+        }
+      } catch (error) {
+        console.error('Error loading transactions:', error);
+        showError('transactionsContent', 'Error loading transactions');
+      }
+    }
+
+    function renderTransactionsTable(transactions) {
+      const container = document.getElementById('transactionsContent');
+      
+      if (transactions.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <i class="fas fa-history"></i>
+            <h4>No Transactions</h4>
+            <p>Your transaction history will appear here after you start trading.</p>
+          </div>
+        `;
+        return;
+      }
+
+      const tableHTML = `
+        <table class="table table-modern">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Stock</th>
+              <th>Type</th>
+              <th>Quantity</th>
+              <th>Price</th>
+              <th>Total</th>
+              <th>P&L</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${transactions.map(tx => `
+              <tr>
+                <td>${new Date(tx.datetime || tx.created_at || Date.now()).toLocaleDateString()}</td>
+                <td>
+                  <div class="stock-symbol">${tx.stock_name || tx.ticker || 'N/A'}</div>
+                </td>
+                <td>
+                  <span class="badge ${tx.type === 'BUY' ? 'bg-success' : 'bg-danger'}">
+                    ${tx.type || 'N/A'}
+                  </span>
+                </td>
+                <td>${tx.quantity || 0}</td>
+                <td>₹${(tx.price_per_stock || tx.price || 0).toLocaleString()}</td>
+                <td>₹${(tx.total_amount || 0).toLocaleString()}</td>
+                <td class="${(tx.profit_loss || 0) >= 0 ? 'price-positive' : 'price-negative'}">
+                  ${tx.profit_loss ? `₹${parseFloat(tx.profit_loss).toLocaleString()}` : '-'}
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+
+      container.innerHTML = tableHTML;
+    }
+
+    async function loadGTTOrders() {
+      try {
+        showLoading('gttContent');
+        const response = await fetch(`${API_BASE}/gtt/${currentUser.id}`);
+        
+        if (response.ok) {
+          const orders = await response.json();
+          const ordersList = Array.isArray(orders) ? orders : [];
+          renderGTTTable(ordersList);
+        } else {
+          showError('gttContent', 'Failed to load GTT orders');
+        }
+      } catch (error) {
+        console.error('Error loading GTT orders:', error);
+        showError('gttContent', 'Error loading GTT orders');
+      }
+    }
+
+    function renderGTTTable(orders) {
+      const container = document.getElementById('gttContent');
+      
+      const createButton = `
+        <div class="mb-3">
+          <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#gttModal" onclick="loadStocksForGTT()">
+            <i class="fas fa-plus me-2"></i>Create GTT Order
+          </button>
+        </div>
+      `;
+
+      if (orders.length === 0) {
+        container.innerHTML = createButton + `
+          <div class="empty-state">
+            <i class="fas fa-clock"></i>
+            <h4>No GTT Orders</h4>
+            <p>Create Good Till Triggered orders to automate your trading.</p>
+          </div>
+        `;
+        return;
+      }
+
+      const tableHTML = createButton + `
+        <table class="table table-modern">
+          <thead>
+            <tr>
+              <th>Stock</th>
+              <th>Action</th>
+              <th>Target Price</th>
+              <th>Quantity</th>
+              <th>Status</th>
+              <th>Created</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${orders.map(order => `
+              <tr>
+                <td>
+                  <div class="stock-symbol">${order.stock_name || order.ticker || 'N/A'}</div>
+                </td>
+                <td>
+                  <span class="badge ${order.action === 'BUY' ? 'bg-success' : 'bg-danger'}">
+                    ${order.action || 'N/A'}
+                  </span>
+                </td>
+                <td>₹${(order.target_price || 0).toLocaleString()}</td>
+                <td>${order.quantity || 0}</td>
+                <td>
+                  <span class="badge bg-warning">Pending</span>
+                </td>
+                <td>${new Date(order.created_at || Date.now()).toLocaleDateString()}</td>
+                <td>
+                  <button class="btn btn-action" style="background: linear-gradient(135deg, #dc3545, #fd7e14); color: white;" 
+                          onclick="deleteGTTOrder(${order.id})">
+                    <i class="fas fa-trash me-1"></i>Cancel
+                  </button>
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+
+      container.innerHTML = tableHTML;
+    }
+
+    function isInWatchlist(stockId) {
+      return userWatchlist.some(item => item.stock_id == stockId);
+    }
+
+    async function toggleWatchlist(stockId, stockName) {
+      try {
+        const isCurrentlyInWatchlist = isInWatchlist(stockId);
+        const endpoint = isCurrentlyInWatchlist ? 'remove' : 'add';
+        
+        const response = await fetch(`${API_BASE}/watchlist/${endpoint}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            userId: currentUser.id,
+            stockId: stockId
+          })
+        });
+
+        if (response.ok) {
+          await loadWatchlistCount();
+          loadAllStocks(); // Refresh to update watchlist buttons
+          showAlert(`${stockName} ${isCurrentlyInWatchlist ? 'removed from' : 'added to'} watchlist!`, 'success');
+        } else {
+          showAlert('Failed to update watchlist', 'error');
+        }
+      } catch (error) {
+        console.error('Error toggling watchlist:', error);
+        showAlert('Error updating watchlist', 'error');
+      }
+    }
+
+    async function removeFromWatchlist(stockId) {
+      try {
+        const response = await fetch(`${API_BASE}/watchlist/remove`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            userId: currentUser.id,
+            stockId: stockId
+          })
+        });
+
+        if (response.ok) {
+          await loadWatchlistCount();
+          loadWatchlist(); // Refresh watchlist table
+          showAlert('Stock removed from watchlist!', 'success');
+        } else {
+          showAlert('Failed to remove from watchlist', 'error');
+        }
+      } catch (error) {
+        console.error('Error removing from watchlist:', error);
+        showAlert('Error removing from watchlist', 'error');
+      }
+    }
+
+    function openTradeModal(stockId, action) {
+      const stock = currentStocks.find(s => s.id == stockId);
+      if (!stock) {
+        showAlert('Stock not found', 'error');
+        return;
+      }
+
+      currentTradeData = {
+        stockId: stockId,
+        action: action,
+        stock: stock,
+        price: stock.price || stock.current_price || 0
+      };
+
+      // Update modal content
+      document.getElementById('tradeModalTitle').innerHTML = 
+        `<i class="fas fa-chart-line me-2"></i>${action} ${stock.name || stock.company_name}`;
+      document.getElementById('tradeStockName').textContent = stock.ticker || stock.symbol || 'N/A';
+      document.getElementById('tradeStockPrice').textContent = `Current Price: ₹${currentTradeData.price.toLocaleString()}`;
+      document.getElementById('tradeQuantity').value = 1;
+      
+      const confirmBtn = document.getElementById('confirmTradeBtn');
+      confirmBtn.className = `btn ${action === 'BUY' ? 'btn-success' : 'btn-danger'}`;
+      confirmBtn.innerHTML = `<i class="fas fa-check me-2"></i>${action}`;
+
+      updateTradeCalculations();
+      
+      // Show modal
+      new bootstrap.Modal(document.getElementById('tradeModal')).show();
+    }
+
+    function updateQuantity(delta) {
+      const input = document.getElementById('tradeQuantity');
+      const currentValue = parseInt(input.value) || 1;
+      const newValue = Math.max(1, currentValue + delta);
+      input.value = newValue;
+      updateTradeCalculations();
+    }
+
+    function updateTradeCalculations() {
+      const quantity = parseInt(document.getElementById('tradeQuantity').value) || 1;
+      const totalAmount = quantity * currentTradeData.price;
+      
+      document.getElementById('totalAmount').textContent = `₹${totalAmount.toLocaleString()}`;
+      
+      // Update available info based on action
+      const availableInfo = document.getElementById('availableInfo');
+      const availableText = document.getElementById('availableText');
+      
+      if (currentTradeData.action === 'BUY') {
+        availableInfo.className = 'alert alert-info alert-custom mb-4';
+        availableText.textContent = 'Available Balance: ₹50,000'; // Demo balance
+      } else {
+        // For sell, show available quantity
+        const holding = userPortfolio.find(h => h.stock_id == currentTradeData.stockId);
+        const availableQty = holding ? holding.quantity : 0;
+        
+        if (quantity > availableQty) {
+          availableInfo.className = 'alert alert-warning alert-custom mb-4';
+          availableText.textContent = `Available Quantity: ${availableQty}`;
+        } else {
+          availableInfo.className = 'alert alert-info alert-custom mb-4';
+          availableText.textContent = `Available Quantity: ${availableQty}`;
+        }
+      }
+    }
+
+    async function confirmTrade() {
+      const quantity = parseInt(document.getElementById('tradeQuantity').value) || 1;
+      const totalAmount = quantity * currentTradeData.price;
+
+      // Validation
+      if (currentTradeData.action === 'SELL') {
+        const holding = userPortfolio.find(h => h.stock_id == currentTradeData.stockId);
+        const availableQty = holding ? holding.quantity : 0;
+        
+        if (quantity > availableQty) {
+          showAlert('Insufficient quantity to sell', 'error');
+          return;
+        }
+      }
+
+      try {
+        const endpoint = currentTradeData.action.toLowerCase();
+        const response = await fetch(`${API_BASE}/${endpoint}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            userId: currentUser.id,
+            stockId: currentTradeData.stockId,
+            quantity: quantity,
+            price: currentTradeData.price
+          })
+        });
+
+        if (response.ok) {
+          bootstrap.Modal.getInstance(document.getElementById('tradeModal')).hide();
+          showAlert(`${currentTradeData.action} order executed successfully!`, 'success');
+          
+          // Refresh data
+          loadUserBalance();
+          loadPortfolioStats();
+          loadPortfolio();
+          loadTransactions();
+        } else {
+          const error = await response.text();
+          showAlert(`Failed to execute ${currentTradeData.action.toLowerCase()} order: ${error}`, 'error');
+        }
+      } catch (error) {
+        console.error(`Error executing ${currentTradeData.action}:`, error);
+        showAlert(`Error executing ${currentTradeData.action.toLowerCase()} order`, 'error');
+      }
+    }
+
+    async function loadStocksForGTT() {
+      try {
+        const response = await fetch(`${API_BASE}/stocks`);
+        if (response.ok) {
+          const stocks = await response.json();
+          const select = document.getElementById('gttStockSelect');
+          select.innerHTML = '<option value="">Select Stock</option>';
+          
+          stocks.forEach(stock => {
+            select.innerHTML += `<option value="${stock.id}">${stock.ticker || stock.symbol} - ${stock.name || stock.company_name}</option>`;
+          });
+        }
+      } catch (error) {
+        console.error('Error loading stocks for GTT:', error);
+      }
+    }
+
+    async function createGTTOrder() {
+      const form = document.getElementById('gttForm');
+      const formData = new FormData(form);
+      
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+
+      try {
+        const response = await fetch(`${API_BASE}/gtt`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            userId: currentUser.id,
+            stockId: document.getElementById('gttStockSelect').value,
+            action: document.getElementById('gttAction').value,
+            targetPrice: parseFloat(document.getElementById('gttTargetPrice').value),
+            quantity: parseInt(document.getElementById('gttQuantity').value)
+          })
+        });
+
+        if (response.ok) {
+          bootstrap.Modal.getInstance(document.getElementById('gttModal')).hide();
+          form.reset();
+          showAlert('GTT order created successfully!', 'success');
+          loadGTTOrders();
+        } else {
+          showAlert('Failed to create GTT order', 'error');
+        }
+      } catch (error) {
+        console.error('Error creating GTT order:', error);
+        showAlert('Error creating GTT order', 'error');
+      }
+    }
+
+    async function deleteGTTOrder(orderId) {
+      if (!confirm('Are you sure you want to cancel this GTT order?')) {
+        return;
+      }
+
+      try {
+        const response = await fetch(`${API_BASE}/gtt/delete`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            orderId: orderId
+          })
+        });
+
+        if (response.ok) {
+          showAlert('GTT order cancelled successfully!', 'success');
+          loadGTTOrders();
+        } else {
+          showAlert('Failed to cancel GTT order', 'error');
+        }
+      } catch (error) {
+        console.error('Error cancelling GTT order:', error);
+        showAlert('Error cancelling GTT order', 'error');
+      }
+    }
+
+    function updateBalance() {
+      // For demo purposes - in real app, this would open a payment gateway
+      const amount = prompt('Enter amount to add to your wallet:');
+      if (amount && !isNaN(amount) && parseFloat(amount) > 0) {
+        showAlert(`₹${parseFloat(amount).toLocaleString()} added to your wallet!`, 'success');
+        loadUserBalance();
+      }
+    }
+
+    function logout() {
+      sessionStorage.clear();
+      window.location.href = 'login.html';
+    }
+
+    function initializeEventListeners() {
+      // Update quantity when input changes
+      document.getElementById('tradeQuantity').addEventListener('input', updateTradeCalculations);
+      
+      // Tab change listeners to load data when needed
+      document.querySelectorAll('[data-bs-toggle="tab"]').forEach(tab => {
+        tab.addEventListener('shown.bs.tab', function (event) {
+          const targetId = event.target.getAttribute('data-bs-target').replace('#', '');
+          switch(targetId) {
+            case 'portfolio':
+              loadPortfolio();
+              break;
+            case 'watchlist':
+              loadWatchlist();
+              break;
+            case 'transactions':
+              loadTransactions();
+              break;
+            case 'gtt':
+              loadGTTOrders();
+              break;
+          }
+        });
+      });
+    }
+
+    function showLoading(containerId) {
+      document.getElementById(containerId).innerHTML = `
+        <div class="loading">
+          <div class="spinner"></div>
+        </div>
+      `;
+    }
+
+    function showError(containerId, message) {
+      document.getElementById(containerId).innerHTML = `
+        <div class="empty-state">
+          <i class="fas fa-exclamation-triangle"></i>
+          <h4>Error</h4>
+          <p>${message}</p>
+        </div>
+      `;
+    }
+
+    function showAlert(message, type = 'info') {
+      const alertClass = type === 'success' ? 'alert-success' : type === 'error' ? 'alert-danger' : 'alert-info';
+      const alertIcon = type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle';
+      
+      const alertHTML = `
+        <div class="alert ${alertClass} alert-dismissible fade show alert-custom position-fixed" 
+             style="top: 100px; right: 20px; z-index: 9999; min-width: 300px;" role="alert">
+          <i class="fas fa-${alertIcon} me-2"></i>
+          ${message}
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+      `;
+      
+      document.body.insertAdjacentHTML('beforeend', alertHTML);
+      
+      // Auto dismiss after 5 seconds
+      setTimeout(() => {
+        const alert = document.querySelector('.alert:last-of-type');
+        if (alert) {
+          bootstrap.Alert.getOrCreateInstance(alert).close();
+        }
+      }, 5000);
+    }
+  </script>
+</body>
+</html>
