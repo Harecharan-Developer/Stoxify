@@ -33,7 +33,7 @@ app.get('/', (req, res) => {
   res.send('Stoxify API is running ✅');
 });
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3069;
 app.listen(PORT, () => {
   console.log(`🚀 Server running at http://localhost:${PORT}`);
 });
