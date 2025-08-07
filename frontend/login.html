@@ -1,5 +1,4 @@
-homepage
-
+//chiruuuuu
 
 <!DOCTYPE html>
 <html lang="en">
@@ -655,887 +654,342 @@ homepage
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
   <script>
-    // Global variables
+    // STOXIFY Front-End Logic, Simplified Per Requirements
+    
+    // ======= Simple Session — Prompt for username on load =======
     let currentUser = null;
-    let currentStocks = [];
-    let userWatchlist = [];
-    let userPortfolio = [];
-    let currentTradeData = {};
-
-    // API Configuration
-    const API_BASE = '/api';
-
-    // Initialize application
-    document.addEventListener('DOMContentLoaded', function() {
-      console.log('DOM loaded, initializing app...');
-      
-      // Prevent multiple initializations
-      if (window.appInitialized) {
-        console.log('App already initialized, skipping...');
-        return;
-      }
-      window.appInitialized = true;
-      
-      // Check if we're already on the login page to prevent redirect loops
-      if (window.location.pathname.includes('login.html')) {
-        console.log('Already on login page, skipping session check');
-        return;
-      }
-      
-      const sessionValid = checkUserSession();
-      if (sessionValid) {
-        initializeEventListeners();
-      }
-    });
-
-    function checkUserSession() {
-      const userId = sessionStorage.getItem('userId');
-      const username = sessionStorage.getItem('username');
-      
-      console.log('Checking session - userId:', userId, 'username:', username);
-      
-      if (!userId || !username) {
-        console.log('No valid session found, redirecting to login');
-        // Add a small delay to prevent immediate redirect loops
-        setTimeout(() => {
-          window.location.href = 'login.html';
-        }, 100);
-        return false;
-      }
-      
-      currentUser = {
-        id: userId,
-        username: username
-      };
-      
-      console.log('Session valid, loading dashboard for user:', currentUser);
-      updateUserInterface();
-      loadDashboardData();
-      return true;
-    }
-
-    function updateUserInterface() {
-      if (currentUser) {
-        document.getElementById('userAvatar').innerHTML = currentUser.username.charAt(0).toUpperCase();
-      }
-    }
-
-    function loadDashboardData() {
-      console.log('Loading dashboard data...');
-      try {
-        loadAllStocks();
-        loadUserBalance();
-        loadPortfolioStats();
-        loadWatchlistCount();
-      } catch (error) {
-        console.error('Error loading dashboard data:', error);
-        showAlert('Error loading dashboard data', 'error');
-      }
-    }
-
-    async function loadUserBalance() {
-      try {
-        console.log('Loading user balance...');
-        
-        // For demo purposes, set a default balance first
-        const defaultBalance = 50000;
-        document.getElementById('userBalance').textContent = `₹${defaultBalance.toLocaleString()}`;
-        document.getElementById('totalBalance').textContent = `₹${defaultBalance.toLocaleString()}`;
-        
-        // Then try to load real data
-        const [portfolioResponse, transactionsResponse] = await Promise.allSettled([
-          fetch(`${API_BASE}/portfolio/${currentUser.id}`),
-          fetch(`${API_BASE}/transactions/${currentUser.id}`)
-        ]);
-        
-        let portfolioValue = 0;
-        let totalPL = 0;
-        
-        if (portfolioResponse.status === 'fulfilled' && portfolioResponse.value.ok) {
-          const portfolio = await portfolioResponse.value.json();
-          if (Array.isArray(portfolio)) {
-            portfolio.forEach(holding => {
-              portfolioValue += (holding.quantity || 0) * (holding.current_price || 0);
-            });
-          }
-        }
-        
-        if (transactionsResponse.status === 'fulfilled' && transactionsResponse.value.ok) {
-          const transactions = await transactionsResponse.value.json();
-          if (Array.isArray(transactions)) {
-            transactions.forEach(tx => {
-              if (tx.type === 'SELL' && tx.profit_loss) {
-                totalPL += parseFloat(tx.profit_loss);
-              }
-            });
-          }
-        }
-        
-        document.getElementById('portfolioValue').textContent = `₹${portfolioValue.toLocaleString()}`;
-        document.getElementById('totalProfitLoss').textContent = `₹${totalPL.toLocaleString()}`;
-        document.getElementById('totalProfitLoss').className = `stats-value ${totalPL >= 0 ? 'text-success' : 'text-danger'}`;
-        
-        console.log('User balance loaded successfully');
-      } catch (error) {
-        console.error('Error loading user balance:', error);
-        // Don't show error to user for balance loading failure
-      }
-    }
-
-    async function loadPortfolioStats() {
-      try {
-        const response = await fetch(`${API_BASE}/portfolio/${currentUser.id}`);
-        if (response.ok) {
-          const portfolio = await response.json();
-          userPortfolio = Array.isArray(portfolio) ? portfolio : [];
-        }
-      } catch (error) {
-        console.error('Error loading portfolio stats:', error);
-      }
-    }
-
-    async function loadWatchlistCount() {
-      try {
-        const response = await fetch(`${API_BASE}/watchlist/${currentUser.id}`);
-        if (response.ok) {
-          const watchlist = await response.json();
-          const count = Array.isArray(watchlist) ? watchlist.length : 0;
-          document.getElementById('watchlistCount').textContent = count;
-          userWatchlist = Array.isArray(watchlist) ? watchlist : [];
-        }
-      } catch (error) {
-        console.error('Error loading watchlist count:', error);
-      }
-    }
-
-    async function loadAllStocks() {
-      try {
-        showLoading('stocksContent');
-        const response = await fetch(`${API_BASE}/stocks`);
-        
-        if (response.ok) {
-          const stocks = await response.json();
-          currentStocks = Array.isArray(stocks) ? stocks : [];
-          renderStocksTable();
-        } else {
-          showError('stocksContent', 'Failed to load stocks');
-        }
-      } catch (error) {
-        console.error('Error loading stocks:', error);
-        showError('stocksContent', 'Error loading stocks');
-      }
-    }
-
-    function renderStocksTable() {
-      const container = document.getElementById('stocksContent');
-      
-      if (currentStocks.length === 0) {
-        container.innerHTML = `
-          <div class="empty-state">
-            <i class="fas fa-chart-line"></i>
-            <h4>No Stocks Available</h4>
-            <p>Stocks will appear here when they are loaded.</p>
-          </div>
-        `;
-        return;
-      }
-
-      const tableHTML = `
-        <table class="table table-modern">
-          <thead>
-            <tr>
-              <th>Stock</th>
-              <th>Current Price</th>
-              <th>Day High</th>
-              <th>Day Low</th>
-              <th>Watchlist</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${currentStocks.map(stock => `
-              <tr>
-                <td>
-                  <div class="stock-symbol">${stock.ticker || stock.symbol || 'N/A'}</div>
-                  <div class="stock-name">${stock.name || stock.company_name || 'Unknown'}</div>
-                </td>
-                <td class="price-positive">₹${(stock.price || stock.current_price || 0).toLocaleString()}</td>
-                <td>₹${(stock.day_high || stock.high || 0).toLocaleString()}</td>
-                <td>₹${(stock.day_low || stock.low || 0).toLocaleString()}</td>
-                <td>
-                  <button class="btn btn-watchlist ${isInWatchlist(stock.id) ? 'active' : ''}" 
-                          onclick="toggleWatchlist(${stock.id}, '${stock.name || stock.company_name}')">
-                    <i class="fas ${isInWatchlist(stock.id) ? 'fa-star' : 'fa-star-o'}"></i>
-                  </button>
-                </td>
-                <td>
-                  <button class="btn btn-action btn-buy" onclick="openTradeModal(${stock.id}, 'BUY')">
-                    <i class="fas fa-arrow-up me-1"></i>Buy
-                  </button>
-                  <button class="btn btn-action btn-sell" onclick="openTradeModal(${stock.id}, 'SELL')">
-                    <i class="fas fa-arrow-down me-1"></i>Sell
-                  </button>
-                </td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
-      `;
-
-      container.innerHTML = tableHTML;
-    }
-
-    async function loadPortfolio() {
-      try {
-        showLoading('portfolioContent');
-        const response = await fetch(`${API_BASE}/portfolio/${currentUser.id}`);
-        
-        if (response.ok) {
-          const portfolio = await response.json();
-          userPortfolio = Array.isArray(portfolio) ? portfolio : [];
-          renderPortfolioTable();
-        } else {
-          showError('portfolioContent', 'Failed to load portfolio');
-        }
-      } catch (error) {
-        console.error('Error loading portfolio:', error);
-        showError('portfolioContent', 'Error loading portfolio');
-      }
-    }
-
-    function renderPortfolioTable() {
-      const container = document.getElementById('portfolioContent');
-      
-      if (userPortfolio.length === 0) {
-        container.innerHTML = `
-          <div class="empty-state">
-            <i class="fas fa-briefcase"></i>
-            <h4>No Holdings</h4>
-            <p>Your portfolio holdings will appear here after you make purchases.</p>
-          </div>
-        `;
-        return;
-      }
-
-      const tableHTML = `
-        <table class="table table-modern">
-          <thead>
-            <tr>
-              <th>Stock</th>
-              <th>Quantity</th>
-              <th>Avg. Price</th>
-              <th>Current Price</th>
-              <th>Value</th>
-              <th>P&L</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${userPortfolio.map(holding => {
-              const currentValue = (holding.quantity || 0) * (holding.current_price || 0);
-              const totalCost = (holding.quantity || 0) * (holding.avg_price || 0);
-              const pnl = currentValue - totalCost;
-              const pnlPercent = totalCost > 0 ? ((pnl / totalCost) * 100) : 0;
-              
-              return `
-                <tr>
-                  <td>
-                    <div class="stock-symbol">${holding.ticker || holding.symbol || 'N/A'}</div>
-                    <div class="stock-name">${holding.stock_name || 'Unknown'}</div>
-                  </td>
-                  <td class="fw-bold">${holding.quantity || 0}</td>
-                  <td>₹${(holding.avg_price || 0).toLocaleString()}</td>
-                  <td>₹${(holding.current_price || 0).toLocaleString()}</td>
-                  <td class="fw-bold">₹${currentValue.toLocaleString()}</td>
-                  <td class="${pnl >= 0 ? 'price-positive' : 'price-negative'}">
-                    ₹${pnl.toLocaleString()} (${pnlPercent.toFixed(2)}%)
-                  </td>
-                  <td>
-                    <button class="btn btn-action btn-sell" onclick="openTradeModal(${holding.stock_id}, 'SELL')">
-                      <i class="fas fa-arrow-down me-1"></i>Sell
-                    </button>
-                  </td>
-                </tr>
-              `;
-            }).join('')}
-          </tbody>
-        </table>
-      `;
-
-      container.innerHTML = tableHTML;
-    }
-
-    async function loadWatchlist() {
-      try {
-        showLoading('watchlistContent');
-        const response = await fetch(`${API_BASE}/watchlist/${currentUser.id}`);
-        
-        if (response.ok) {
-          const watchlist = await response.json();
-          userWatchlist = Array.isArray(watchlist) ? watchlist : [];
-          renderWatchlistTable();
-        } else {
-          showError('watchlistContent', 'Failed to load watchlist');
-        }
-      } catch (error) {
-        console.error('Error loading watchlist:', error);
-        showError('watchlistContent', 'Error loading watchlist');
-      }
-    }
-
-    function renderWatchlistTable() {
-      const container = document.getElementById('watchlistContent');
-      
-      if (userWatchlist.length === 0) {
-        container.innerHTML = `
-          <div class="empty-state">
-            <i class="fas fa-star"></i>
-            <h4>No Watchlist Items</h4>
-            <p>Add stocks to your watchlist to track them here.</p>
-          </div>
-        `;
-        return;
-      }
-
-      const tableHTML = `
-        <table class="table table-modern">
-          <thead>
-            <tr>
-              <th>Stock</th>
-              <th>Current Price</th>
-              <th>Day High</th>
-              <th>Day Low</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${userWatchlist.map(item => `
-              <tr>
-                <td>
-                  <div class="stock-symbol">${item.ticker || item.symbol || 'N/A'}</div>
-                  <div class="stock-name">${item.stock_name || 'Unknown'}</div>
-                </td>
-                <td class="price-positive">₹${(item.current_price || 0).toLocaleString()}</td>
-                <td>₹${(item.day_high || 0).toLocaleString()}</td>
-                <td>₹${(item.day_low || 0).toLocaleString()}</td>
-                <td>
-                  <button class="btn btn-action btn-buy" onclick="openTradeModal(${item.stock_id}, 'BUY')">
-                    <i class="fas fa-arrow-up me-1"></i>Buy
-                  </button>
-                  <button class="btn btn-action btn-sell" onclick="openTradeModal(${item.stock_id}, 'SELL')">
-                    <i class="fas fa-arrow-down me-1"></i>Sell
-                  </button>
-                  <button class="btn btn-action" style="background: linear-gradient(135deg, #dc3545, #fd7e14); color: white;" 
-                          onclick="removeFromWatchlist(${item.stock_id})">
-                    <i class="fas fa-trash me-1"></i>Remove
-                  </button>
-                </td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
-      `;
-
-      container.innerHTML = tableHTML;
-    }
-
-    async function loadTransactions() {
-      try {
-        showLoading('transactionsContent');
-        const response = await fetch(`${API_BASE}/transactions/${currentUser.id}`);
-        
-        if (response.ok) {
-          const transactions = await response.json();
-          const transactionsList = Array.isArray(transactions) ? transactions : [];
-          renderTransactionsTable(transactionsList);
-        } else {
-          showError('transactionsContent', 'Failed to load transactions');
-        }
-      } catch (error) {
-        console.error('Error loading transactions:', error);
-        showError('transactionsContent', 'Error loading transactions');
-      }
-    }
-
-    function renderTransactionsTable(transactions) {
-      const container = document.getElementById('transactionsContent');
-      
-      if (transactions.length === 0) {
-        container.innerHTML = `
-          <div class="empty-state">
-            <i class="fas fa-history"></i>
-            <h4>No Transactions</h4>
-            <p>Your transaction history will appear here after you start trading.</p>
-          </div>
-        `;
-        return;
-      }
-
-      const tableHTML = `
-        <table class="table table-modern">
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Stock</th>
-              <th>Type</th>
-              <th>Quantity</th>
-              <th>Price</th>
-              <th>Total</th>
-              <th>P&L</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${transactions.map(tx => `
-              <tr>
-                <td>${new Date(tx.datetime || tx.created_at || Date.now()).toLocaleDateString()}</td>
-                <td>
-                  <div class="stock-symbol">${tx.stock_name || tx.ticker || 'N/A'}</div>
-                </td>
-                <td>
-                  <span class="badge ${tx.type === 'BUY' ? 'bg-success' : 'bg-danger'}">
-                    ${tx.type || 'N/A'}
-                  </span>
-                </td>
-                <td>${tx.quantity || 0}</td>
-                <td>₹${(tx.price_per_stock || tx.price || 0).toLocaleString()}</td>
-                <td>₹${(tx.total_amount || 0).toLocaleString()}</td>
-                <td class="${(tx.profit_loss || 0) >= 0 ? 'price-positive' : 'price-negative'}">
-                  ${tx.profit_loss ? `₹${parseFloat(tx.profit_loss).toLocaleString()}` : '-'}
-                </td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
-      `;
-
-      container.innerHTML = tableHTML;
-    }
-
-    async function loadGTTOrders() {
-      try {
-        showLoading('gttContent');
-        const response = await fetch(`${API_BASE}/gtt/${currentUser.id}`);
-        
-        if (response.ok) {
-          const orders = await response.json();
-          const ordersList = Array.isArray(orders) ? orders : [];
-          renderGTTTable(ordersList);
-        } else {
-          showError('gttContent', 'Failed to load GTT orders');
-        }
-      } catch (error) {
-        console.error('Error loading GTT orders:', error);
-        showError('gttContent', 'Error loading GTT orders');
-      }
-    }
-
-    function renderGTTTable(orders) {
-      const container = document.getElementById('gttContent');
-      
-      const createButton = `
-        <div class="mb-3">
-          <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#gttModal" onclick="loadStocksForGTT()">
-            <i class="fas fa-plus me-2"></i>Create GTT Order
-          </button>
-        </div>
-      `;
-
-      if (orders.length === 0) {
-        container.innerHTML = createButton + `
-          <div class="empty-state">
-            <i class="fas fa-clock"></i>
-            <h4>No GTT Orders</h4>
-            <p>Create Good Till Triggered orders to automate your trading.</p>
-          </div>
-        `;
-        return;
-      }
-
-      const tableHTML = createButton + `
-        <table class="table table-modern">
-          <thead>
-            <tr>
-              <th>Stock</th>
-              <th>Action</th>
-              <th>Target Price</th>
-              <th>Quantity</th>
-              <th>Status</th>
-              <th>Created</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${orders.map(order => `
-              <tr>
-                <td>
-                  <div class="stock-symbol">${order.stock_name || order.ticker || 'N/A'}</div>
-                </td>
-                <td>
-                  <span class="badge ${order.action === 'BUY' ? 'bg-success' : 'bg-danger'}">
-                    ${order.action || 'N/A'}
-                  </span>
-                </td>
-                <td>₹${(order.target_price || 0).toLocaleString()}</td>
-                <td>${order.quantity || 0}</td>
-                <td>
-                  <span class="badge bg-warning">Pending</span>
-                </td>
-                <td>${new Date(order.created_at || Date.now()).toLocaleDateString()}</td>
-                <td>
-                  <button class="btn btn-action" style="background: linear-gradient(135deg, #dc3545, #fd7e14); color: white;" 
-                          onclick="deleteGTTOrder(${order.id})">
-                    <i class="fas fa-trash me-1"></i>Cancel
-                  </button>
-                </td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
-      `;
-
-      container.innerHTML = tableHTML;
-    }
-
-    function isInWatchlist(stockId) {
-      return userWatchlist.some(item => item.stock_id == stockId);
-    }
-
-    async function toggleWatchlist(stockId, stockName) {
-      try {
-        const isCurrentlyInWatchlist = isInWatchlist(stockId);
-        const endpoint = isCurrentlyInWatchlist ? 'remove' : 'add';
-        
-        const response = await fetch(`${API_BASE}/watchlist/${endpoint}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            userId: currentUser.id,
-            stockId: stockId
-          })
-        });
-
-        if (response.ok) {
-          await loadWatchlistCount();
-          loadAllStocks(); // Refresh to update watchlist buttons
-          showAlert(`${stockName} ${isCurrentlyInWatchlist ? 'removed from' : 'added to'} watchlist!`, 'success');
-        } else {
-          showAlert('Failed to update watchlist', 'error');
-        }
-      } catch (error) {
-        console.error('Error toggling watchlist:', error);
-        showAlert('Error updating watchlist', 'error');
-      }
-    }
-
-    async function removeFromWatchlist(stockId) {
-      try {
-        const response = await fetch(`${API_BASE}/watchlist/remove`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            userId: currentUser.id,
-            stockId: stockId
-          })
-        });
-
-        if (response.ok) {
-          await loadWatchlistCount();
-          loadWatchlist(); // Refresh watchlist table
-          showAlert('Stock removed from watchlist!', 'success');
-        } else {
-          showAlert('Failed to remove from watchlist', 'error');
-        }
-      } catch (error) {
-        console.error('Error removing from watchlist:', error);
-        showAlert('Error removing from watchlist', 'error');
-      }
-    }
-
-    function openTradeModal(stockId, action) {
-      const stock = currentStocks.find(s => s.id == stockId);
-      if (!stock) {
-        showAlert('Stock not found', 'error');
-        return;
-      }
-
-      currentTradeData = {
-        stockId: stockId,
-        action: action,
-        stock: stock,
-        price: stock.price || stock.current_price || 0
-      };
-
-      // Update modal content
-      document.getElementById('tradeModalTitle').innerHTML = 
-        `<i class="fas fa-chart-line me-2"></i>${action} ${stock.name || stock.company_name}`;
-      document.getElementById('tradeStockName').textContent = stock.ticker || stock.symbol || 'N/A';
-      document.getElementById('tradeStockPrice').textContent = `Current Price: ₹${currentTradeData.price.toLocaleString()}`;
-      document.getElementById('tradeQuantity').value = 1;
-      
-      const confirmBtn = document.getElementById('confirmTradeBtn');
-      confirmBtn.className = `btn ${action === 'BUY' ? 'btn-success' : 'btn-danger'}`;
-      confirmBtn.innerHTML = `<i class="fas fa-check me-2"></i>${action}`;
-
-      updateTradeCalculations();
-      
-      // Show modal
-      new bootstrap.Modal(document.getElementById('tradeModal')).show();
-    }
-
-    function updateQuantity(delta) {
-      const input = document.getElementById('tradeQuantity');
-      const currentValue = parseInt(input.value) || 1;
-      const newValue = Math.max(1, currentValue + delta);
-      input.value = newValue;
-      updateTradeCalculations();
-    }
-
-    function updateTradeCalculations() {
-      const quantity = parseInt(document.getElementById('tradeQuantity').value) || 1;
-      const totalAmount = quantity * currentTradeData.price;
-      
-      document.getElementById('totalAmount').textContent = `₹${totalAmount.toLocaleString()}`;
-      
-      // Update available info based on action
-      const availableInfo = document.getElementById('availableInfo');
-      const availableText = document.getElementById('availableText');
-      
-      if (currentTradeData.action === 'BUY') {
-        availableInfo.className = 'alert alert-info alert-custom mb-4';
-        availableText.textContent = 'Available Balance: ₹50,000'; // Demo balance
-      } else {
-        // For sell, show available quantity
-        const holding = userPortfolio.find(h => h.stock_id == currentTradeData.stockId);
-        const availableQty = holding ? holding.quantity : 0;
-        
-        if (quantity > availableQty) {
-          availableInfo.className = 'alert alert-warning alert-custom mb-4';
-          availableText.textContent = `Available Quantity: ${availableQty}`;
-        } else {
-          availableInfo.className = 'alert alert-info alert-custom mb-4';
-          availableText.textContent = `Available Quantity: ${availableQty}`;
-        }
-      }
-    }
-
-    async function confirmTrade() {
-      const quantity = parseInt(document.getElementById('tradeQuantity').value) || 1;
-      const totalAmount = quantity * currentTradeData.price;
-
-      // Validation
-      if (currentTradeData.action === 'SELL') {
-        const holding = userPortfolio.find(h => h.stock_id == currentTradeData.stockId);
-        const availableQty = holding ? holding.quantity : 0;
-        
-        if (quantity > availableQty) {
-          showAlert('Insufficient quantity to sell', 'error');
+    let stocksData = [];
+    let portfolio = [];
+    let watchlist = [];
+    let transactions = [];
+    let gttOrders = [];
+    
+    const API_BASE = 'http://localhost:3069/api';
+    
+    window.addEventListener('DOMContentLoaded', async function() {
+      // Simple session: prompt for username if not already set
+      let username = sessionStorage.getItem('username');
+      if (!username) {
+        username = prompt('Enter your username:');
+        if (!username) {
+          alert('Username required!');
           return;
         }
+        sessionStorage.setItem('username', username);
       }
-
-      try {
-        const endpoint = currentTradeData.action.toLowerCase();
-        const response = await fetch(`${API_BASE}/${endpoint}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            userId: currentUser.id,
-            stockId: currentTradeData.stockId,
-            quantity: quantity,
-            price: currentTradeData.price
-          })
-        });
-
-        if (response.ok) {
-          bootstrap.Modal.getInstance(document.getElementById('tradeModal')).hide();
-          showAlert(`${currentTradeData.action} order executed successfully!`, 'success');
-          
-          // Refresh data
-          loadUserBalance();
-          loadPortfolioStats();
-          loadPortfolio();
-          loadTransactions();
-        } else {
-          const error = await response.text();
-          showAlert(`Failed to execute ${currentTradeData.action.toLowerCase()} order: ${error}`, 'error');
-        }
-      } catch (error) {
-        console.error(`Error executing ${currentTradeData.action}:`, error);
-        showAlert(`Error executing ${currentTradeData.action.toLowerCase()} order`, 'error');
-      }
-    }
-
-    async function loadStocksForGTT() {
-      try {
-        const response = await fetch(`${API_BASE}/stocks`);
-        if (response.ok) {
-          const stocks = await response.json();
-          const select = document.getElementById('gttStockSelect');
-          select.innerHTML = '<option value="">Select Stock</option>';
-          
-          stocks.forEach(stock => {
-            select.innerHTML += `<option value="${stock.id}">${stock.ticker || stock.symbol} - ${stock.name || stock.company_name}</option>`;
-          });
-        }
-      } catch (error) {
-        console.error('Error loading stocks for GTT:', error);
-      }
-    }
-
-    async function createGTTOrder() {
-      const form = document.getElementById('gttForm');
-      const formData = new FormData(form);
-      
-      if (!form.checkValidity()) {
-        form.reportValidity();
+      currentUser = await fetchUserByUsername(username);
+      if (!currentUser) {
+        alert('User not found or login failed.');
+        sessionStorage.clear();
+        location.reload();
         return;
       }
-
-      try {
-        const response = await fetch(`${API_BASE}/gtt`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            userId: currentUser.id,
-            stockId: document.getElementById('gttStockSelect').value,
-            action: document.getElementById('gttAction').value,
-            targetPrice: parseFloat(document.getElementById('gttTargetPrice').value),
-            quantity: parseInt(document.getElementById('gttQuantity').value)
-          })
-        });
-
-        if (response.ok) {
-          bootstrap.Modal.getInstance(document.getElementById('gttModal')).hide();
-          form.reset();
-          showAlert('GTT order created successfully!', 'success');
-          loadGTTOrders();
-        } else {
-          showAlert('Failed to create GTT order', 'error');
-        }
-      } catch (error) {
-        console.error('Error creating GTT order:', error);
-        showAlert('Error creating GTT order', 'error');
-      }
-    }
-
-    async function deleteGTTOrder(orderId) {
-      if (!confirm('Are you sure you want to cancel this GTT order?')) {
-        return;
-      }
-
-      try {
-        const response = await fetch(`${API_BASE}/gtt/delete`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            orderId: orderId
-          })
-        });
-
-        if (response.ok) {
-          showAlert('GTT order cancelled successfully!', 'success');
-          loadGTTOrders();
-        } else {
-          showAlert('Failed to cancel GTT order', 'error');
-        }
-      } catch (error) {
-        console.error('Error cancelling GTT order:', error);
-        showAlert('Error cancelling GTT order', 'error');
-      }
-    }
-
-    function updateBalance() {
-      // For demo purposes - in real app, this would open a payment gateway
-      const amount = prompt('Enter amount to add to your wallet:');
-      if (amount && !isNaN(amount) && parseFloat(amount) > 0) {
-        showAlert(`₹${parseFloat(amount).toLocaleString()} added to your wallet!`, 'success');
-        loadUserBalance();
-      }
-    }
-
-    function logout() {
-      sessionStorage.clear();
-      window.location.href = 'login.html';
-    }
-
-    function initializeEventListeners() {
-      // Update quantity when input changes
-      document.getElementById('tradeQuantity').addEventListener('input', updateTradeCalculations);
-      
-      // Tab change listeners to load data when needed
-      document.querySelectorAll('[data-bs-toggle="tab"]').forEach(tab => {
-        tab.addEventListener('shown.bs.tab', function (event) {
-          const targetId = event.target.getAttribute('data-bs-target').replace('#', '');
-          switch(targetId) {
-            case 'portfolio':
-              loadPortfolio();
-              break;
-            case 'watchlist':
-              loadWatchlist();
-              break;
-            case 'transactions':
-              loadTransactions();
-              break;
-            case 'gtt':
-              loadGTTOrders();
-              break;
-          }
-        });
+      document.getElementById('userAvatar').innerText = username.charAt(0).toUpperCase();
+      await loadAllDataTables();
+    });
+    
+    async function fetchUserByUsername(username) {
+      // Here we ask the user for their password — in real app, replace with login.html or a modal.
+      const password = prompt('Enter your password:');
+      const response = await fetch(`${API_BASE}/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
       });
+      if (response.ok) {
+        const { user } = await response.json();
+        sessionStorage.setItem('userId', user.user_id);
+        return user;
+      }
+      return null;
     }
-
-    function showLoading(containerId) {
+    
+    // ======= Loading All Tables at Startup =======
+    async function loadAllDataTables() {
+      await Promise.all([
+        loadAllStocks(),
+        loadPortfolio(),
+        loadWatchlist(),
+        loadTransactions(),
+        loadGttOrders(),
+        loadUserBalance()
+      ]);
+    }
+    
+    // ========== ALL STOCKS =============
+    async function loadAllStocks() {
+      setLoading('stocksContent');
+      const response = await fetch(`${API_BASE}/stocks`);
+      if (!response.ok) return setEmpty('stocksContent', 'No Stocks Available');
+      stocksData = await response.json();
+      renderStocksTable();
+    }
+    function renderStocksTable() {
+      // Reuse previous style, but fields as per API
+      let html = `<table class="table table-modern"><thead>
+        <tr><th>Stock</th><th>Current Price</th><th>Day High</th><th>Day Low</th><th>Watchlist</th><th>Actions</th></tr>
+        </thead><tbody>`;
+      for (const stock of stocksData) {
+        html += `<tr>
+          <td>
+            <div class="stock-symbol">${stock.ticker}</div>
+            <div class="stock-name">${stock.company_name}</div>
+          </td>
+          <td class="price-positive">₹${parseFloat(stock.current_sprice).toLocaleString()}</td>
+          <td>₹${parseFloat(stock.max_sprice).toLocaleString()}</td>
+          <td>₹${parseFloat(stock.min_sprice).toLocaleString()}</td>
+          <td>
+            <button class="btn btn-watchlist${isInWatchlist(stock.stock_id) ? ' active' : ''}"
+              onclick="toggleWatchlist(${stock.stock_id})">
+              <i class="fas ${isInWatchlist(stock.stock_id) ? 'fa-star' : 'fa-star-o'}"></i>
+            </button>
+          </td>
+          <td>
+            <button class="btn btn-action btn-buy" onclick="openTradeModal(${stock.stock_id}, 'BUY')">
+              <i class="fas fa-arrow-up me-1"></i>Buy
+            </button>
+            <button class="btn btn-action btn-sell" onclick="openTradeModal(${stock.stock_id}, 'SELL')">
+              <i class="fas fa-arrow-down me-1"></i>Sell
+            </button>
+          </td></tr>`;
+      }
+      html += '</tbody></table>';
+      document.getElementById('stocksContent').innerHTML = html;
+    }
+    
+    // ========== PORTFOLIO ===========
+    async function loadPortfolio() {
+      setLoading('portfolioContent');
+      const userId = sessionStorage.getItem('userId');
+      const response = await fetch(`${API_BASE}/portfolio/${userId}`);
+      if (!response.ok) return setEmpty('portfolioContent', 'No Holdings');
+      portfolio = await response.json();
+      renderPortfolioTable();
+    }
+    function renderPortfolioTable() {
+      if (!portfolio.length) return setEmpty('portfolioContent', 'No Holdings');
+      let html = `<table class="table table-modern"><thead>
+        <tr><th>Stock</th><th>Quantity</th><th>Avg. Price</th><th>Current Price</th><th>Value</th><th>P&amp;L</th><th>Actions</th></tr>
+        </thead><tbody>`;
+      for (const holding of portfolio) {
+        const currentValue = (holding.quantity || 0) * (holding.current_price || 0);
+        const pnl = holding.profit_loss || (currentValue - (holding.net_investment || 0));
+        const pnlClass = pnl >= 0 ? 'price-positive' : 'price-negative';
+        html += `<tr>
+          <td>
+            <div class="stock-symbol">${holding.ticker || ''}</div>
+            <div class="stock-name">${holding.company_name || ''}</div>
+          </td>
+          <td>${holding.quantity}</td>
+          <td>₹${Number(holding.avg_buy_price || 0).toLocaleString()}</td>
+          <td>₹${Number(holding.current_price || 0).toLocaleString()}</td>
+          <td>₹${Number(currentValue).toLocaleString()}</td>
+          <td class="${pnlClass}">₹${Number(pnl).toLocaleString()}</td>
+          <td>
+            <button class="btn btn-action btn-sell" onclick="openTradeModal(${holding.stock_id}, 'SELL')">
+              <i class="fas fa-arrow-down me-1"></i>Sell
+            </button>
+          </td>
+        </tr>`;
+      }
+      html += '</tbody></table>';
+      document.getElementById('portfolioContent').innerHTML = html;
+    }
+    
+    // ========== WATCHLIST ===========
+    async function loadWatchlist() {
+      setLoading('watchlistContent');
+      const userId = sessionStorage.getItem('userId');
+      const response = await fetch(`${API_BASE}/watchlist/${userId}`);
+      if (!response.ok) return setEmpty('watchlistContent', 'No Watchlist Items');
+      watchlist = await response.json();
+      renderWatchlistTable();
+    }
+    function renderWatchlistTable() {
+      if (!watchlist.length) return setEmpty('watchlistContent', 'No Watchlist Items');
+      let html = `<table class="table table-modern"><thead>
+        <tr><th>Stock</th><th>Current Price</th><th>Actions</th></tr></thead><tbody>`;
+      for (const w of watchlist) {
+        html += `<tr>
+          <td><div class="stock-symbol">${w.ticker}</div>
+              <div class="stock-name">${w.company_name}</div></td>
+          <td>₹${Number(w.current_sprice || 0).toLocaleString()}</td>
+          <td>
+            <button class="btn btn-action btn-buy" onclick="openTradeModal(${w.stock_id}, 'BUY')">
+              <i class="fas fa-arrow-up me-1"></i>Buy
+            </button>
+            <button class="btn btn-action btn-sell" onclick="openTradeModal(${w.stock_id}, 'SELL')">
+              <i class="fas fa-arrow-down me-1"></i>Sell
+            </button>
+            <button class="btn btn-action" style="background: linear-gradient(135deg, #dc3545, #fd7e14); color: white;"
+              onclick="removeFromWatchlist(${w.stock_id})">
+              <i class="fas fa-trash me-1"></i>Remove
+            </button>
+          </td>
+        </tr>`;
+      }
+      html += '</tbody></table>';
+      document.getElementById('watchlistContent').innerHTML = html;
+    }
+    function isInWatchlist(stockId) {
+      return watchlist.some(w => w.stock_id == stockId);
+    }
+    async function toggleWatchlist(stockId) {
+      const userId = sessionStorage.getItem('userId');
+      const inList = isInWatchlist(stockId);
+      await fetch(`${API_BASE}/watchlist/${inList ? 'remove' : 'add'}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: Number(userId), stock_id: Number(stockId) })
+      });
+      await loadAllStocks();
+      await loadWatchlist();
+    }
+    async function removeFromWatchlist(stockId) {
+      await toggleWatchlist(stockId);
+    }
+    
+    // ========== TRANSACTIONS ===========
+    async function loadTransactions() {
+      setLoading('transactionsContent');
+      const userId = sessionStorage.getItem('userId');
+      const response = await fetch(`${API_BASE}/transactions/${userId}`);
+      if (!response.ok) return setEmpty('transactionsContent', 'No Transactions');
+      transactions = await response.json();
+      renderTransactionsTable();
+    }
+    function renderTransactionsTable() {
+      if (!transactions.length) return setEmpty('transactionsContent', 'No Transactions');
+      let html = `<table class="table table-modern"><thead>
+        <tr><th>Date</th><th>Stock</th><th>Type</th><th>Quantity</th><th>Price</th><th>Total</th><th>P&amp;L</th></tr>
+        </thead><tbody>`;
+      for (const t of transactions) {
+        html += `<tr>
+          <td>${(t.transaction_time || '').split('T')[0]}</td>
+          <td>${t.company_name || t.ticker || ''}</td>
+          <td><span class="badge ${t.type === 'BUY' ? 'bg-success' : 'bg-danger'}">${t.type || ''}</span></td>
+          <td>${t.quantity}</td>
+          <td>₹${Number(t.price_at_transaction).toLocaleString()}</td>
+          <td>₹${Number((t.price_at_transaction || 0) * (t.quantity || 1)).toLocaleString()}</td>
+          <td>-</td>
+        </tr>`;
+      }
+      html += '</tbody></table>';
+      document.getElementById('transactionsContent').innerHTML = html;
+    }
+    
+    // ========== GTT ORDERS ===========
+    async function loadGttOrders() {
+      setLoading('gttContent');
+      const userId = sessionStorage.getItem('userId');
+      const response = await fetch(`${API_BASE}/gtt/${userId}`);
+      if (!response.ok) return setEmpty('gttContent', 'No GTT Orders');
+      gttOrders = await response.json();
+      renderGttTable();
+    }
+    function renderGttTable() {
+      if (!gttOrders.length) return setEmpty('gttContent', 'No GTT Orders');
+      let html = `<table class="table table-modern"><thead>
+        <tr><th>Stock</th><th>Action</th><th>Target Price</th><th>Quantity</th><th>Created</th><th>Actions</th></tr>
+        </thead><tbody>`;
+      for (const gtt of gttOrders) {
+        html += `<tr>
+          <td>${gtt.stock_id}</td>
+          <td>${gtt.action}</td>
+          <td>₹${Number(gtt.target_price).toLocaleString()}</td>
+          <td>${gtt.quantity}</td>
+          <td>${(gtt.created_at || '').split('T')[0]}</td>
+          <td>
+            <button class="btn btn-action" style="background: linear-gradient(135deg, #dc3545, #fd7e14); color: white;"
+             onclick="deleteGttOrder(${gtt.gtt_id})">
+             <i class="fas fa-trash me-1"></i>Cancel
+            </button>
+          </td>
+        </tr>`;
+      }
+      html += '</tbody></table>';
+      document.getElementById('gttContent').innerHTML = html;
+    }
+    async function deleteGttOrder(gttId) {
+      await fetch(`${API_BASE}/gtt/delete`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ gtt_id: gttId })
+      });
+      await loadGttOrders();
+    }
+    
+    // ========== WALLET ===========
+    async function loadUserBalance() {
+      const userId = sessionStorage.getItem('userId');
+      const response = await fetch(`${API_BASE}/wallet/${userId}`);
+      let balance = 0;
+      if (response.ok) {
+        const data = await response.json();
+        balance = data.balance || 0;
+      }
+      document.getElementById('userBalance').textContent = `₹${Number(balance).toLocaleString()}`;
+      document.getElementById('totalBalance').textContent = `₹${Number(balance).toLocaleString()}`;
+    }
+    
+    // ======= Trade =========
+    function openTradeModal(stockId, action) {
+      // Store data for modal
+      const stock = stocksData.find(s => s.stock_id == stockId);
+      if (!stock) return alert('Stock not found!');
+      const stockName = stock.company_name || stock.ticker;
+      const modal = new bootstrap.Modal(document.getElementById('tradeModal'));
+      document.getElementById('tradeModalTitle').innerText = `${action} ${stockName}`;
+      document.getElementById('tradeStockName').textContent = stock.ticker;
+      document.getElementById('tradeStockPrice').textContent = `Current Price: ₹${stock.current_sprice.toLocaleString()}`;
+      document.getElementById('tradeQuantity').value = 1;
+      document.getElementById('confirmTradeBtn').onclick = () => confirmTrade(stockId, action);
+      document.getElementById('confirmTradeBtn').className = `btn ${action === 'BUY' ? 'btn-success' : 'btn-danger'}`;
+      modal.show();
+    }
+    
+    async function confirmTrade(stockId, action) {
+      const userId = sessionStorage.getItem('userId');
+      const quantity = Number(document.getElementById('tradeQuantity').value) || 1;
+      const stock = stocksData.find(s => s.stock_id == stockId);
+      if (!stock) return;
+      const route = action === 'BUY' ? 'buy' : 'sell';
+      await fetch(`${API_BASE}/${route}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: Number(userId), stock_id: Number(stockId), quantity })
+      });
+      bootstrap.Modal.getInstance(document.getElementById('tradeModal')).hide();
+      await loadAllDataTables();
+    }
+    
+    function setLoading(containerId) {
       document.getElementById(containerId).innerHTML = `
-        <div class="loading">
-          <div class="spinner"></div>
-        </div>
-      `;
+        <div class="loading"><div class="spinner"></div></div>`;
     }
-
-    function showError(containerId, message) {
+    function setEmpty(containerId, msg) {
       document.getElementById(containerId).innerHTML = `
-        <div class="empty-state">
-          <i class="fas fa-exclamation-triangle"></i>
-          <h4>Error</h4>
-          <p>${message}</p>
-        </div>
-      `;
+        <div class="empty-state"><i class="fas fa-info-circle"></i><h4>${msg}</h4></div>`;
     }
-
-    function showAlert(message, type = 'info') {
-      const alertClass = type === 'success' ? 'alert-success' : type === 'error' ? 'alert-danger' : 'alert-info';
-      const alertIcon = type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle';
-      
-      const alertHTML = `
-        <div class="alert ${alertClass} alert-dismissible fade show alert-custom position-fixed" 
-             style="top: 100px; right: 20px; z-index: 9999; min-width: 300px;" role="alert">
-          <i class="fas fa-${alertIcon} me-2"></i>
-          ${message}
-          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-      `;
-      
-      document.body.insertAdjacentHTML('beforeend', alertHTML);
-      
-      // Auto dismiss after 5 seconds
-      setTimeout(() => {
-        const alert = document.querySelector('.alert:last-of-type');
-        if (alert) {
-          bootstrap.Alert.getOrCreateInstance(alert).close();
+    
+    // ======== REFRESH BUTTON HANDLERS =======
+    document.addEventListener('click', function(e) {
+      if (e.target.closest('button')) {
+        const btn = e.target.closest('button');
+        if (btn.textContent.includes('Refresh')) {
+          if (btn.closest('#stocks')) loadAllStocks();
+          if (btn.closest('#portfolio')) loadPortfolio();
+          if (btn.closest('#watchlist')) loadWatchlist();
+          if (btn.closest('#transactions')) loadTransactions();
+          if (btn.closest('#gtt')) loadGttOrders();
         }
-      }, 5000);
-    }
-  </script>
+      }
+    });
+    
+    </script>
+    
+
 </body>
 </html>
