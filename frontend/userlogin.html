@@ -179,8 +179,13 @@
         const result = await response.json();
 
         if (response.ok) {
+          // Store user information in sessionStorage
+          sessionStorage.setItem('isLoggedIn', 'true');
+          sessionStorage.setItem('userId', result.userId || result.id || username);
+          sessionStorage.setItem('username', username);
+          sessionStorage.setItem('password', password);
           // Redirect or load dashboard
-          window.location.href = "/login.html";
+          window.location.href = "/stoxify-homepage.html";
         } else {
           alert(result.message || "Invalid credentials.");
         }

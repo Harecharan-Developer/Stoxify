@@ -1,5 +1,3 @@
-//chiruuuuu
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -672,7 +670,7 @@
       // Simple session: prompt for username if not already set
       let username = sessionStorage.getItem('username');
       if (!username) {
-        username = prompt('Enter your username:');
+        username = "testuser"
         if (!username) {
           alert('Username required!');
           return;
@@ -692,7 +690,7 @@
     
     async function fetchUserByUsername(username) {
       // Here we ask the user for their password — in real app, replace with login.html or a modal.
-      const password = prompt('Enter your password:');
+      const password = sessionStorage.getItem('password') || "password123";
       const response = await fetch(`${API_BASE}/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -717,6 +715,8 @@
         loadUserBalance()
       ]);
     }
+
+
     
     // ========== ALL STOCKS =============
     async function loadAllStocks() {
@@ -735,6 +735,7 @@
         html += `<tr>
           <td>
             <div class="stock-symbol">${stock.ticker}</div>
+            <div class="text-muted" style="font-size: 0.8rem;">ID: ${stock.stock_id}</div>
             <div class="stock-name">${stock.company_name}</div>
           </td>
           <td class="price-positive">₹${parseFloat(stock.current_sprice).toLocaleString()}</td>

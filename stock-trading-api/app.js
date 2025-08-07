@@ -7,6 +7,9 @@ const dotenv = require('dotenv');
 const routes = require('./routes/index');
 const db = require('./db/config');
 const path = require('path');
+const updateStockPrices = require('./db/cronJobs'); // Adjust path if needed
+const cron = require('node-cron');
+
 
 dotenv.config();
 
@@ -23,7 +26,7 @@ app.use((req, res, next) => {
 // Serve the frontend index.html as the landing page
 app.use(express.static(path.join(__dirname, '../frontend')));
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/login.html'));
+res.sendFile(path.join(__dirname, '../frontend/userlogin.html'));
 });
 // Use routes
 app.use('/api', routes);
@@ -36,4 +39,14 @@ app.get('/', (req, res) => {
 const PORT = process.env.PORT || 3069;
 app.listen(PORT, () => {
   console.log(`🚀 Server running at http://localhost:${PORT}`);
+  // Start cron jobs after server starts
+  cron.schedule('*/10 * * * * *', async () => {
+  try {
+    await updateStockPrices();
+  } catch (error) {
+    console.error('Error running cron job:', error);
+  }
+});
+
+console.log('Cron job for updating stock prices initialized');
 });
