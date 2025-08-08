@@ -43,15 +43,15 @@ if (process.env.NODE_ENV !== 'test') {
     console.log(`🚀 Server running at http://localhost:${PORT}`);
     
     // Start cron jobs after server starts
-    cron.schedule('*/2 * * * * *', async () => {
-      try {
-        await updateStockPrices();
-      } catch (error) {
-        console.error('Error running cron job:', error);
-      }
-    });
+    // cron.schedule('*/2 * * * * *', async () => {
+    //   try {
+    //     await updateStockPrices();
+    //   } catch (error) {
+    //     console.error('Error running cron job:', error);
+    //   }
+    // });
     
-    console.log('Cron job for updating stock prices initialized');
+    // console.log('Cron job for updating stock prices initialized');
   });
 }
 
