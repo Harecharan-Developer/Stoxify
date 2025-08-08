@@ -3,17 +3,16 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-    "scripts": {
-    "test": "NODE_ENV=test jest",
-    "test:coverage": "NODE_ENV=test jest --coverage",
-    "test:watch": "NODE_ENV=test jest --watch",
-    "test:ci": "NODE_ENV=test jest --coverage --watchAll=false",
+  "scripts": {
+    "test": "jest",
+    "test:coverage": "jest --coverage",
+    "test:watch": "jest --watch",
+    "test:ci": "jest --coverage --watchAll=false",
     "lint": "echo 'No linting configured yet'",
     "build": "echo 'No build step required'",
     "start": "node server.js",
     "dev": "nodemon server.js"
   },
-  
   "keywords": [],
   "author": "",
   "license": "ISC",
