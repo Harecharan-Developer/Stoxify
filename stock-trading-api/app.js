@@ -16,11 +16,13 @@ dotenv.config();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(require('express-status-monitor')());
 
 // Make db accessible in requests (optional but useful)
 app.use((req, res, next) => {
   req.db = db;
   next();
+  console.log('Database connection established');
 });
 
 // Serve the frontend index.html as the landing page
@@ -28,6 +30,8 @@ app.use(express.static(path.join(__dirname, '../frontend')));
 app.get('/', (req, res) => {
 res.sendFile(path.join(__dirname, '../frontend/userlogin.html'));
 });
+
+
 // Use routes
 app.use('/api', routes);
 
@@ -40,7 +44,7 @@ const PORT = process.env.PORT || 3069;
 app.listen(PORT, () => {
   console.log(`🚀 Server running at http://localhost:${PORT}`);
   // Start cron jobs after server starts
-  cron.schedule('*/10 * * * * *', async () => {
+  cron.schedule('*/2 * * * * *', async () => {
   try {
     await updateStockPrices();
   } catch (error) {

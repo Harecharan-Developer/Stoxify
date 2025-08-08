@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Portfolio Analysis - Stoxify Interactive</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    /* Reset & body */
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      margin: 0;
+      max-width: 960px;
+      color: #2c3e50;
+      padding-top: 70px; /* space for fixed header */
+      padding-bottom: 40px;
+      margin-left: auto;
+      margin-right: auto;
+      min-height: 100vh;
+    }
+    
+
+    /* Fixed header/navbar */
+    header {
+      box-sizing: border-box;
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 60px;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      z-index: 10000;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 1.8rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      user-select: none;
+      display: flex;
+      align-items: center;
+    }
+
+    header h1::before {
+      content: "📈";
+      margin-right: 8px;
+      font-size: 1.5rem;
+      -webkit-text-fill-color: initial;
+    }
+
+    header a.button {
+      display: inline-block;
+      padding: 10px 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      font-weight: 600;
+      text-decoration: none;
+      border-radius: 25px;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+      transition: all 0.3s ease;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    header a.button:hover,
+    header a.button:focus {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+      outline: none;
+    }
+
+    /* Main content */
+    h1.page-title {
+      text-align: center;
+      margin-top: 0;
+      margin-bottom: 30px;
+      color: white;
+      font-size: 2.5rem;
+      font-weight: 700;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+      user-select: none;
+    }
+
+    /* Charts grid styling */
+    .charts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 25px;
+      margin-bottom: 40px;
+    }
+
+    .chart-container {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 15px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 20px 25px;
+      height: 320px;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.3s ease;
+    }
+
+    .chart-container:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    .chart-container h2 {
+      margin-bottom: 12px;
+      font-size: 1.1rem;
+      color: #34495e;
+      user-select: none;
+    }
+
+    canvas {
+      flex-grow: 1;
+      max-height: 260px;
+      max-width: 100%;
+      cursor: pointer;
+    }
+
+    /* Modal styling */
+    #chartModal {
+      display: none;
+      position: fixed;
+      top:0; left:0; right:0; bottom:0;
+      background: rgba(0,0,0,0.7);
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+
+    #chartModal > div {
+      position: relative;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 15px;
+      padding: 20px;
+      width: 80vw;
+      max-width: 900px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    #modalCloseBtn {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+      border: none;
+      color: white;
+      font-size: 20px;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      cursor: pointer;
+      line-height: 1;
+      transition: all 0.3s ease;
+    }
+
+    #modalCloseBtn:hover,
+    #modalCloseBtn:focus {
+      transform: scale(1.1);
+      outline: none;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Stoxify Analysis</h1>
+    <a href="stoxify-homepage.html" class="button" aria-label="Back to Dashboard">Back to Dashboard</a>
+  </header>
+
+  <h1 class="page-title">Interactive Stock Portfolio Analysis</h1>
+
+  <div class="charts-grid">
+    <div class="chart-container">
+      <h2>Profit / Loss Per Stock</h2>
+      <canvas id="profitLossChart" aria-label="Profit and Loss Per Stock chart" role="img"></canvas>
+    </div>
+
+    <div class="chart-container">
+      <h2>Portfolio Allocation by Quantity</h2>
+      <canvas id="quantityDistributionChart" aria-label="Portfolio Allocation by Quantity chart" role="img"></canvas>
+    </div>
+
+    <div class="chart-container">
+      <h2>Buy vs Sell Transactions</h2>
+      <canvas id="transactionTypeChart" aria-label="Buy vs Sell Transactions pie chart" role="img"></canvas>
+    </div>
+
+    <div class="chart-container">
+      <h2>Portfolio Value Over Time</h2>
+      <canvas id="portfolioValueChart" aria-label="Portfolio Value Over Time line chart" role="img"></canvas>
+    </div>
+
+    <div class="chart-container">
+      <h2>Top Gainers and Losers</h2>
+      <canvas id="gainersLosersChart" aria-label="Top Gainers and Losers bar chart" role="img"></canvas>
+    </div>
+
+    <div class="chart-container">
+      <h2>Watchlist Stock Prices</h2>
+      <canvas id="watchlistPriceChart" aria-label="Watchlist Stock Prices bar chart" role="img"></canvas>
+    </div>
+  </div>
+
+  <!-- Modal for enlarged chart -->
+  <div id="chartModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div>
+      <button id="modalCloseBtn" aria-label="Close chart modal">×</button>
+      <canvas id="modalChart"></canvas>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = 'http://localhost:3069/api';
+    const userId = 1;  // Adjust based on your auth logic
+
+    async function fetchData(endpoint) {
+      const resp = await fetch(`${API_BASE}/${endpoint}`);
+      if (!resp.ok) {
+        console.error(`Failed to fetch ${endpoint}`, resp.status);
+        return null;
+      }
+      return await resp.json();
+    }
+
+    // Modal elements and instance
+    const chartModal = document.getElementById('chartModal');
+    const modalCloseBtn = document.getElementById('modalCloseBtn');
+    const modalCanvas = document.getElementById('modalChart');
+    let modalChartInstance = null;
+
+    function openChartInModal(chart) {
+      if (modalChartInstance) {
+        modalChartInstance.destroy();
+      }
+      modalChartInstance = new Chart(modalCanvas.getContext('2d'), {
+        type: chart.config.type,
+        data: JSON.parse(JSON.stringify(chart.data)),
+        options: JSON.parse(JSON.stringify(chart.options))
+      });
+      chartModal.style.display = 'flex';
+      modalCloseBtn.focus();
+    }
+
+    modalCloseBtn.onclick = () => {
+      if (modalChartInstance) {
+        modalChartInstance.destroy();
+        modalChartInstance = null;
+      }
+      chartModal.style.display = 'none';
+    };
+
+    chartModal.onclick = (e) => {
+      if (e.target === chartModal) modalCloseBtn.onclick();
+    };
+
+    function addClickListenersToCharts(chartInstances) {
+      chartInstances.forEach(chart => {
+        chart.canvas.style.cursor = 'pointer';
+        chart.canvas.onclick = () => openChartInModal(chart);
+      });
+    }
+
+    async function renderCharts() {
+      const [portfolio, transactions, watchlist] = await Promise.all([
+        fetchData(`portfolio/${userId}`),
+        fetchData(`transactions/${userId}`),
+        fetchData(`watchlist/${userId}`)
+      ]);
+
+      if (!portfolio || !transactions) {
+        document.body.insertAdjacentHTML('beforeend', '<p style="color:red; text-align:center;">Error loading data.</p>');
+        return;
+      }
+
+      // Profit/Loss per stock
+      const profitLossLabels = portfolio.map(p => `${p.company_name} (${p.stock_id})`);
+      const profitLossData = portfolio.map(p => +p.profit_loss.toFixed(2));
+      const profitLossColors = profitLossData.map(pl => pl >= 0 ? 'rgba(46, 204, 113, 0.7)' : 'rgba(231, 76, 60, 0.7)');
+
+      // Portfolio allocation by quantity (donut)
+      const quantityLabels = portfolio.map(p => p.company_name);
+      const quantityData = portfolio.map(p => p.quantity);
+      const palette = [
+        '#3498db', '#9b59b6', '#f1c40f', '#e67e22',
+        '#2ecc71', '#e74c3c', '#1abc9c', '#34495e',
+        '#7f8c8d', '#8e44ad'
+      ];
+      const quantityColors = quantityLabels.map((_, i) => palette[i % palette.length]);
+
+      // Buy vs Sell count
+      const buyCount = transactions.filter(t => t.type === 'BUY').length;
+      const sellCount = transactions.filter(t => t.type === 'SELL').length;
+
+      // Portfolio value over time
+      const portfolioValueByDate = {};
+      transactions.forEach(tx => {
+        const date = tx.transaction_time ? tx.transaction_time.substring(0,10) : null;
+        if (!date) return;
+        if (!portfolioValueByDate[date]) portfolioValueByDate[date] = 0;
+        const sign = tx.type === 'BUY' ? 1 : -1;
+        portfolioValueByDate[date] += sign * tx.quantity * tx.price_at_transaction;
+      });
+      const sortedDates = Object.keys(portfolioValueByDate).sort();
+      let cumulative = 0;
+      const portfolioValueData = sortedDates.map(date => {
+        cumulative += portfolioValueByDate[date];
+        return +cumulative.toFixed(2);
+      });
+
+      // Top gainers and losers
+      const gainers = portfolio.filter(p => p.profit_loss > 0)
+                              .sort((a,b) => b.profit_loss - a.profit_loss)
+                              .slice(0, 5);
+      const losers = portfolio.filter(p => p.profit_loss < 0)
+                             .sort((a,b) => a.profit_loss - b.profit_loss)
+                             .slice(0, 5);
+      const gainLosLabels = [...gainers.map(g => g.company_name), ...losers.map(l => l.company_name)];
+      const gainLosData = [...gainers.map(g => +g.profit_loss.toFixed(2)), ...losers.map(l => +l.profit_loss.toFixed(2))];
+      const gainLosColors = [
+        ...gainers.map(() => 'rgba(46, 204, 113, 0.7)'),
+        ...losers.map(() => 'rgba(231, 76, 60, 0.7)')
+      ];
+
+      // Watchlist stock prices
+      const watchLabels = watchlist ? watchlist.map(w => w.ticker) : [];
+      const watchPrices = watchlist ? watchlist.map(w => +w.current_sprice) : [];
+
+      const charts = [];
+
+      charts.push(new Chart(document.getElementById('profitLossChart').getContext('2d'), {
+        type: 'bar',
+        data: {
+          labels: profitLossLabels,
+          datasets: [{
+            label: 'Profit / Loss ($)',
+            data: profitLossData,
+            backgroundColor: profitLossColors,
+            borderColor: profitLossColors.map(c => c.replace('0.7', '1')),
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: { y: { beginAtZero: true } },
+          plugins: {
+            legend: { display: false },
+            tooltip: { callbacks: { label: ctx => `$${ctx.parsed.y.toLocaleString()}` } }
+          }
+        }
+      }));
+
+      charts.push(new Chart(document.getElementById('quantityDistributionChart').getContext('2d'), {
+        type: 'doughnut',
+        data: {
+          labels: quantityLabels,
+          datasets: [{
+            label: 'Quantity Distribution',
+            data: quantityData,
+            backgroundColor: quantityColors,
+            borderColor: '#fff',
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          cutout: '70%',
+          plugins: {
+            tooltip: {
+              callbacks: {
+                label: ctx => `${ctx.label}: ${ctx.parsed} shares (${((ctx.parsed / quantityData.reduce((a,b) => a+b,0)) * 100).toFixed(1)}%)`
+              }
+            },
+            legend: { position: 'right', labels: { boxWidth: 15, padding: 10 } }
+          }
+        }
+      }));
+
+      charts.push(new Chart(document.getElementById('transactionTypeChart').getContext('2d'), {
+        type: 'pie',
+        data: {
+          labels: ['Buy Transactions', 'Sell Transactions'],
+          datasets: [{
+            label: 'Count',
+            data: [buyCount, sellCount],
+            backgroundColor: ['rgba(46, 204, 113, 0.7)', 'rgba(231, 76, 60, 0.7)']
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { position: 'bottom' }
+          }
+        }
+      }));
+
+      charts.push(new Chart(document.getElementById('portfolioValueChart').getContext('2d'), {
+        type: 'line',
+        data: {
+          labels: sortedDates,
+          datasets: [{
+            label: 'Portfolio Value Over Time',
+            data: portfolioValueData,
+            fill: true,
+            backgroundColor: 'rgba(52, 152, 219, 0.2)',
+            borderColor: 'rgba(52, 152, 219, 1)',
+            borderWidth: 2,
+            tension: 0.3,
+            pointRadius: 3,
+            pointHoverRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: { beginAtZero: true },
+            x: { ticks: { maxRotation: 90, minRotation: 45 } }
+          },
+          interaction: {
+            mode: 'index',
+            intersect: false,
+          },
+          plugins: {
+            tooltip: { mode: 'nearest' }
+          }
+        }
+      }));
+
+      charts.push(new Chart(document.getElementById('gainersLosersChart').getContext('2d'), {
+        type: 'bar',
+        data: {
+          labels: gainLosLabels,
+          datasets: [{
+            label: 'Profit / Loss',
+            data: gainLosData,
+            backgroundColor: gainLosColors,
+            borderColor: gainLosColors.map(c => c.replace('0.7', '1')),
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: { y: { beginAtZero: true } },
+          plugins: {
+            legend: { display: false },
+            tooltip: { callbacks: { label: ctx => `$${ctx.parsed.y.toLocaleString()}` } }
+          }
+        }
+      }));
+
+      charts.push(new Chart(document.getElementById('watchlistPriceChart').getContext('2d'), {
+        type: 'bar',
+        data: {
+          labels: watchLabels,
+          datasets: [{
+            label: 'Current Price',
+            data: watchPrices,
+            backgroundColor: 'rgba(241, 196, 15, 0.7)',
+            borderColor: 'rgba(241, 196, 15, 1)',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: { y: { beginAtZero: true } },
+          plugins: {
+            legend: { display: false },
+            tooltip: { callbacks: { label: ctx => `₹${ctx.parsed.y.toLocaleString()}` } }
+          }
+        }
+      }));
+
+      addClickListenersToCharts(charts);
+    }
+
+    renderCharts();
+  </script>
+</body>
+</html>

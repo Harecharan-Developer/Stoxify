@@ -149,30 +149,47 @@ async function loadPortfolio() {
 
 function renderPortfolioTable() {
     if (!portfolio.length) return setEmpty('portfolioContent', 'No Holdings');
-    let html = `<table class="table table-modern"><thead>
-    <tr><th>Stock</th><th>Quantity</th><th>Avg. Price</th><th>Current Price</th><th>Value</th><th>P&amp;L</th><th>Actions</th></tr>
-    </thead><tbody>`;
-    for (const holding of portfolio) {
-        const currentValue = (holding.quantity || 0) * (holding.current_price || 0);
-        const pnl = holding.profit_loss || (currentValue - (holding.net_investment || 0));
-        const pnlClass = pnl >= 0 ? 'price-positive' : 'price-negative';
+    
+    let html = `<table class="table table-modern">
+        <thead>
+            <tr>
+                <th>Stock</th>
+                <th>Quantity</th>
+                <th>Current Price</th>
+                <th>Current Value</th>
+                <th>P&L</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>`;
+    
+    for (const p of portfolio) {
+        const pnlClass = p.profit_loss >= 0 ? 'price-positive' : 'price-negative';
+        const pnlIcon = p.profit_loss >= 0 ? 'fa-arrow-up' : 'fa-arrow-down';
+        
         html += `<tr>
-      <td>
-        <div class="stock-symbol">${holding.ticker || ''}</div>
-        <div class="stock-name">${holding.company_name || ''}</div>
-      </td>
-      <td>${holding.quantity}</td>
-      <td>₹${Number(holding.avg_buy_price || 0).toLocaleString()}</td>
-      <td>₹${Number(holding.current_price || 0).toLocaleString()}</td>
-      <td>₹${Number(currentValue).toLocaleString()}</td>
-      <td class="${pnlClass}">₹${Number(pnl).toLocaleString()}</td>
-      <td>
-        <button class="btn btn-action btn-sell" onclick="openTradeModal(${holding.stock_id}, 'SELL')">
-          <i class="fas fa-arrow-down me-1"></i>Sell
-        </button>
-      </td>
-    </tr>`;
+            <td>
+                <div class="stock-symbol">${p.ticker}</div>
+                <div class="stock-name">${p.company_name}</div>
+            </td>
+            <td class="fw-bold">${p.quantity}</td>
+            <td class="fw-bold">₹${Number(p.current_price || 0).toLocaleString()}</td>
+            <td class="fw-bold">₹${Number(p.current_value || 0).toLocaleString()}</td>
+            <td class="${pnlClass}">
+                <i class="fas ${pnlIcon} me-1"></i>
+                ₹${Number(Math.abs(p.profit_loss || 0)).toLocaleString()}
+            </td>
+            <td>
+                <button class="btn btn-action btn-sell" onclick="openTradeModal(${p.stock_id}, 'SELL')">
+                    <i class="fas fa-arrow-down me-1"></i>Sell
+                </button>
+                <button class="btn btn-action btn-buy" onclick="openTradeModal(${p.stock_id}, 'BUY')">
+                    <i class="fas fa-arrow-up me-1"></i>Buy More
+                </button>
+            </td>
+        </tr>`;
     }
+    
     html += '</tbody></table>';
     document.getElementById('portfolioContent').innerHTML = html;
 }
@@ -778,3 +795,35 @@ async function confirmWithdrawMoney() {
   }
 }
 
+// ...existing code...
+
+// Search functionality for stocks
+function filterStocks() {
+  const searchTerm = document.getElementById('stockSearchInput').value.toLowerCase();
+  const stockRows = document.querySelectorAll('#stocksContent tbody tr');
+  
+  stockRows.forEach(row => {
+    const symbol = row.cells[0]?.textContent.toLowerCase() || '';
+    const name = row.cells[1]?.textContent.toLowerCase() || '';
+    
+    if (symbol.includes(searchTerm) || name.includes(searchTerm)) {
+      row.style.display = '';
+    } else {
+      row.style.display = 'none';
+    }
+  });
+}
+
+// Clear search when switching tabs
+document.addEventListener('DOMContentLoaded', function() {
+  const tabTriggers = document.querySelectorAll('[data-bs-toggle="tab"]');
+  tabTriggers.forEach(trigger => {
+    trigger.addEventListener('shown.bs.tab', function(e) {
+      if (e.target.id !== 'stocks-tab') {
+        document.getElementById('stockSearchInput').value = '';
+      }
+    });
+  });
+});
+
+// ...existing code...

@@ -1,2 +1,11 @@
 node_modules/
 .env
+stock-trading-api/node_modules/
+
+
+
+test/
+test/**
+
+coverage/
+

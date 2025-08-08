@@ -1,0 +1,19 @@
+{
+  "name": "stock-trading-api",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "jest"
+  },
+  "dependencies": {
+    "jest": "^27.0.0"
+  },
+  "devDependencies": {},
+  "jest": {
+    "testEnvironment": "node",
+    "collectCoverage": true,
+    "coverageDirectory": "coverage",
+    "testPathIgnorePatterns": [
+      "/node_modules/"
+    ]
+  }
+}

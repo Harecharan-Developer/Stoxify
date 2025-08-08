@@ -189,67 +189,130 @@ exports.getUserTransactions = async (req, res) => {
 };
 
 
-exports.getUserPortfolio = async (req, res) => {
-  const db = require('../db/config');
-  const { userId } = req.params;
+// exports.getUserPortfolio = async (req, res) => {
+//   const db = require('../db/config');
+//   const { userId } = req.params;
 
-  // Get stock holding summary
-  const [holdings] = await db.execute(
-    `SELECT t.stock_id, s.company_name, s.current_sprice,
-            SUM(CASE WHEN t.type = 'BUY' THEN t.quantity ELSE -t.quantity END) AS quantity
-     FROM transactions t
-     JOIN stockdata s ON t.stock_id = s.stock_id
-     WHERE t.user_id = ?
-     GROUP BY t.stock_id
-     HAVING quantity > 0`,
-    [userId]
-  );
+//   // Get stock holding summary
+//   const [holdings] = await db.execute(
+//     `SELECT t.stock_id, s.company_name, s.current_sprice,
+//             SUM(CASE WHEN t.type = 'BUY' THEN t.quantity ELSE -t.quantity END) AS quantity
+//      FROM transactions t
+//      JOIN stockdata s ON t.stock_id = s.stock_id
+//      WHERE t.user_id = ?
+//      GROUP BY t.stock_id
+//      HAVING quantity > 0`,
+//     [userId]
+//   );
 
-  // Get total investment per stock (buy)
-  const [buyHistory] = await db.execute(
-    `SELECT stock_id, SUM(quantity * price_at_transaction) AS total_investment
-     FROM transactions
-     WHERE user_id = ? AND type = 'BUY'
-     GROUP BY stock_id`,
-    [userId]
-  );
+//   // Get total investment per stock (buy)
+//   const [buyHistory] = await db.execute(
+//     `SELECT stock_id, SUM(quantity * price_at_transaction) AS total_investment
+//      FROM transactions
+//      WHERE user_id = ? AND type = 'BUY'
+//      GROUP BY stock_id`,
+//     [userId]
+//   );
 
-  // Get total earnings per stock (sell)
-  const [sellHistory] = await db.execute(
-    `SELECT stock_id, SUM(quantity * price_at_transaction) AS total_earnings
-     FROM transactions
-     WHERE user_id = ? AND type = 'SELL'
-     GROUP BY stock_id`,
-    [userId]
-  );
+//   // Get total earnings per stock (sell)
+//   const [sellHistory] = await db.execute(
+//     `SELECT stock_id, SUM(quantity * price_at_transaction) AS total_earnings
+//      FROM transactions
+//      WHERE user_id = ? AND type = 'SELL'
+//      GROUP BY stock_id`,
+//     [userId]
+//   );
 
-  const buyMap = Object.fromEntries(buyHistory.map(b => [b.stock_id, b]));
-  const sellMap = Object.fromEntries(sellHistory.map(s => [s.stock_id, s]));
+//   const buyMap = Object.fromEntries(buyHistory.map(b => [b.stock_id, b]));
+//   const sellMap = Object.fromEntries(sellHistory.map(s => [s.stock_id, s]));
 
-  const portfolio = holdings.map(h => {
-    const buy = buyMap[h.stock_id] || { total_investment: 0 };
-    const sell = sellMap[h.stock_id] || { total_earnings: 0 };
+//   const portfolio = holdings.map(h => {
+//     const buy = buyMap[h.stock_id] || { total_investment: 0 };
+//     const sell = sellMap[h.stock_id] || { total_earnings: 0 };
 
-    const currentValue = h.quantity * h.current_sprice;
-    const netInvestment = buy.total_investment - sell.total_earnings;
-    const profitLoss = currentValue - netInvestment;
+//     const currentValue = h.quantity * h.current_sprice;
+//     const netInvestment = buy.total_investment - sell.total_earnings;
+//     const profitLoss = currentValue - netInvestment;
 
-    return {
-      stock_id: h.stock_id,
-      company_name: h.company_name,
-      quantity: h.quantity,
-      current_price: h.current_sprice,
-      current_value: currentValue,
-      net_investment: netInvestment,
-      profit_loss: profitLoss
-    };
-  });
+//     return {
+//       stock_id: h.stock_id,
+//       company_name: h.company_name,
+//       quantity: h.quantity,
+//       current_price: h.current_sprice,
+//       current_value: currentValue,
+//       net_investment: netInvestment,
+//       profit_loss: profitLoss
+//     };
+//   });
 
-  res.json(portfolio);
-};
+//   res.json(portfolio);
+// };
 
 
+// exports.getUserPortfolio = async (req, res) => {
+//   const db = require('../db/config');
+//   const { userId } = req.params;
 
+//   // Get stock holding summary with purchase details
+//   const [holdings] = await db.execute(
+//     `SELECT t.stock_id, s.company_name, s.ticker, s.current_sprice,
+//             SUM(CASE WHEN t.type = 'BUY' THEN t.quantity ELSE -t.quantity END) AS quantity,
+//             AVG(CASE WHEN t.type = 'BUY' THEN t.price_at_transaction END) AS avg_buy_price,
+//             MIN(CASE WHEN t.type = 'BUY' THEN t.price_at_transaction END) AS first_buy_price,
+//             MAX(CASE WHEN t.type = 'BUY' THEN t.created_at END) AS last_buy_date
+//      FROM transactions t
+//      JOIN stockdata s ON t.stock_id = s.stock_id
+//      WHERE t.user_id = ?
+//      GROUP BY t.stock_id, s.company_name, s.ticker, s.current_sprice
+//      HAVING quantity > 0`,
+//     [userId]
+//   );
+
+//   // Get total investment per stock (buy)
+//   const [buyHistory] = await db.execute(
+//     `SELECT stock_id, SUM(quantity * price_at_transaction) AS total_investment
+//      FROM transactions
+//      WHERE user_id = ? AND type = 'BUY'
+//      GROUP BY stock_id`,
+//     [userId]
+//   );
+
+//   // Get total earnings per stock (sell)
+//   const [sellHistory] = await db.execute(
+//     `SELECT stock_id, SUM(quantity * price_at_transaction) AS total_earnings
+//      FROM transactions
+//      WHERE user_id = ? AND type = 'SELL'
+//      GROUP BY stock_id`,
+//     [userId]
+//   );
+
+//   const buyMap = Object.fromEntries(buyHistory.map(b => [b.stock_id, b]));
+//   const sellMap = Object.fromEntries(sellHistory.map(s => [s.stock_id, s]));
+
+//   const portfolio = holdings.map(h => {
+//     const buy = buyMap[h.stock_id] || { total_investment: 0 };
+//     const sell = sellMap[h.stock_id] || { total_earnings: 0 };
+
+//     const currentValue = h.quantity * h.current_sprice;
+//     const netInvestment = buy.total_investment - sell.total_earnings;
+//     const profitLoss = currentValue - netInvestment;
+
+//     return {
+//       stock_id: h.stock_id,
+//       ticker: h.ticker,
+//       company_name: h.company_name,
+//       quantity: h.quantity,
+//       current_price: h.current_sprice,
+//       avg_buy_price: h.avg_buy_price,          // Average buy price
+//       first_buy_price: h.first_buy_price,      // First purchase price
+//       current_value: currentValue,
+//       net_investment: netInvestment,
+//       profit_loss: profitLoss
+//     };
+//   });
+
+//   res.json(portfolio);
+// };
 
 // GTT ORDERS
 exports.createGTTOrder = async (req, res) => {
@@ -404,3 +467,65 @@ res.json({ success: true });
 
 //   res.json(portfolio);
 // };
+
+exports.getUserPortfolio = async (req, res) => {
+  const db = require('../db/config');
+  const { userId } = req.params;
+
+  // Get stock holding summary (remove the created_at reference)
+  const [holdings] = await db.execute(
+    `SELECT t.stock_id, s.company_name, s.ticker, s.current_sprice,
+            SUM(CASE WHEN t.type = 'BUY' THEN t.quantity ELSE -t.quantity END) AS quantity,
+            AVG(CASE WHEN t.type = 'BUY' THEN t.price_at_transaction END) AS avg_buy_price
+     FROM transactions t
+     JOIN stockdata s ON t.stock_id = s.stock_id
+     WHERE t.user_id = ?
+     GROUP BY t.stock_id, s.company_name, s.ticker, s.current_sprice
+     HAVING quantity > 0`,
+    [userId]
+  );
+
+  // Get total investment per stock (buy)
+  const [buyHistory] = await db.execute(
+    `SELECT stock_id, SUM(quantity * price_at_transaction) AS total_investment
+     FROM transactions
+     WHERE user_id = ? AND type = 'BUY'
+     GROUP BY stock_id`,
+    [userId]
+  );
+
+  // Get total earnings per stock (sell)
+  const [sellHistory] = await db.execute(
+    `SELECT stock_id, SUM(quantity * price_at_transaction) AS total_earnings
+     FROM transactions
+     WHERE user_id = ? AND type = 'SELL'
+     GROUP BY stock_id`,
+    [userId]
+  );
+
+  const buyMap = Object.fromEntries(buyHistory.map(b => [b.stock_id, b]));
+  const sellMap = Object.fromEntries(sellHistory.map(s => [s.stock_id, s]));
+
+  const portfolio = holdings.map(h => {
+    const buy = buyMap[h.stock_id] || { total_investment: 0 };
+    const sell = sellMap[h.stock_id] || { total_earnings: 0 };
+
+    const currentValue = h.quantity * h.current_sprice;
+    const netInvestment = buy.total_investment - sell.total_earnings;
+    const profitLoss = currentValue - netInvestment;
+
+    return {
+      stock_id: h.stock_id,
+      ticker: h.ticker,
+      company_name: h.company_name,
+      quantity: h.quantity,
+      current_price: h.current_sprice,
+      avg_buy_price: h.avg_buy_price,           // Average purchase price
+      current_value: currentValue,
+      net_investment: netInvestment,
+      profit_loss: profitLoss
+    };
+  });
+
+  res.json(portfolio);
+};
