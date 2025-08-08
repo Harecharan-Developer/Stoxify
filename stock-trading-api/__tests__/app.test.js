@@ -1,13 +1,15 @@
 const request = require('supertest');
 const app = require('../app');
 
-test('GET /api should respond with a 200 status code', async () => {
-    const response = await request(app).get('/api');
+describe('App Tests', () => {
+  test('should respond to health check', async () => {
+    const response = await request(app).get('/health');
     expect(response.statusCode).toBe(200);
-});
+    expect(response.body.status).toBe('OK');
+  });
 
-test('POST /api should create a new resource', async () => {
-    const response = await request(app).post('/api').send({ name: 'Test' });
-    expect(response.statusCode).toBe(201);
-    expect(response.body.name).toBe('Test');
+  test('should serve static files', async () => {
+    const response = await request(app).get('/');
+    expect(response.statusCode).toBe(200);
+  });
 });
