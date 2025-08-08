@@ -379,12 +379,22 @@
           <div class="user-avatar" data-bs-toggle="dropdown" id="userAvatar">
             <i class="fas fa-user"></i>
           </div>
-          <ul class="dropdown-menu dropdown-menu-end">
-            <li><a class="dropdown-item" href="#" id="profileOption"><i class="fas fa-user me-2"></i>Profile</a></li>
-            <li><a class="dropdown-item" href="#" onclick="updateBalance()"><i class="fas fa-wallet me-2"></i>Add Money</a></li>
-            <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item text-danger" href="#" onclick="logout()"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
-          </ul>
+<ul class="dropdown-menu dropdown-menu-end">
+  <li><a class="dropdown-item" href="userlogin.html" id="profileOption">
+    <i class="fas fa-user me-2"></i>Profile
+  </a></li>
+  <li><hr class="dropdown-divider"></li>
+  <li><a class="dropdown-item text-success" href="#" onclick="openAddMoneyModal()">
+    <i class="fas fa-plus-circle me-2"></i>Add Money
+  </a></li>
+  <li><a class="dropdown-item text-warning" href="#" onclick="openWithdrawMoneyModal()">
+    <i class="fas fa-minus-circle me-2"></i>Withdraw Money
+  </a></li>
+  <li><hr class="dropdown-divider"></li>
+  <li><a class="dropdown-item text-danger" href="#" onclick="logout()">
+    <i class="fas fa-sign-out-alt me-2"></i>Logout
+  </a></li>
+</ul>
         </div>
       </div>
     </div>
@@ -655,5 +665,83 @@
 
 <script src="frontend-script.js"></script>
 
+<!-- Add Money Modal -->
+<div class="modal fade" id="addMoneyModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="fas fa-wallet me-2"></i>Add Money to Wallet
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label fw-bold">Amount to Add</label>
+          <div class="input-group">
+            <span class="input-group-text">₹</span>
+            <input type="number" class="form-control" id="addMoneyAmount" step="0.01" min="1" placeholder="Enter amount">
+          </div>
+        </div>
+        <div class="mb-3">
+          <div class="d-flex justify-content-between">
+            <span>Current Balance:</span>
+            <span class="fw-bold text-primary" id="currentBalanceDisplay">₹0</span>
+          </div>
+        </div>
+        <div class="alert alert-info alert-custom">
+          <i class="fas fa-info-circle me-2"></i>
+          Minimum amount: ₹1
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-success" onclick="confirmAddMoney()">
+          <i class="fas fa-plus me-2"></i>Add Money
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Withdraw Money Modal -->
+<div class="modal fade" id="withdrawMoneyModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="fas fa-money-bill-wave me-2"></i>Withdraw Money from Wallet
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label fw-bold">Amount to Withdraw</label>
+          <div class="input-group">
+            <span class="input-group-text">₹</span>
+            <input type="number" class="form-control" id="withdrawMoneyAmount" step="0.01" min="1" placeholder="Enter amount">
+          </div>
+        </div>
+        <div class="mb-3">
+          <div class="d-flex justify-content-between">
+            <span>Current Balance:</span>
+            <span class="fw-bold text-primary" id="currentBalanceDisplayWithdraw">₹0</span>
+          </div>
+        </div>
+        <div class="alert alert-warning alert-custom">
+          <i class="fas fa-exclamation-triangle me-2"></i>
+          Make sure you have sufficient balance before withdrawing
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-danger" onclick="confirmWithdrawMoney()">
+          <i class="fas fa-minus me-2"></i>Withdraw Money
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 </body>
+
 </html>
