@@ -279,17 +279,23 @@ function renderTransactionsTable() {
     html += '</tbody></table>';
     document.getElementById('transactionsContent').innerHTML = html;
 }
-// ========== GTT ORDERS ===========
+// Update the loadGttOrders function to call loadGTTOrders (notice the capital letters)
 async function loadGttOrders() {
+    return await loadGTTOrders(); // Call the existing function
+}
+
+// Or make sure your existing loadGTTOrders function is renamed correctly
+async function loadGTTOrders() {
     setLoading('gttContent');
     const userId = sessionStorage.getItem('userId');
-    if (!userId) return setEmpty('gttContent', 'User not logged in');
+    if (!userId) return;
 
     try {
         const response = await fetch(`${API_BASE}/gtt/${userId}`);
         if (!response.ok) return setEmpty('gttContent', 'No GTT Orders');
         gttOrders = await response.json();
         renderGttTable();
+        updateTopSectionSummary();
     } catch (error) {
         console.error('Error loading GTT orders:', error);
         setEmpty('gttContent', 'Error loading GTT orders');
@@ -550,23 +556,6 @@ async function confirmTrade(stockId, action) {
     await loadAllDataTables(); // This will update everything including top section
 }
 
-// Update GTT functions to refresh counts
-async function loadGttOrders() {
-    setLoading('gttContent');
-    const userId = sessionStorage.getItem('userId');
-    if (!userId) return setEmpty('gttContent', 'User not logged in');
-
-    try {
-        const response = await fetch(`${API_BASE}/gtt/${userId}`);
-        if (!response.ok) return setEmpty('gttContent', 'No GTT Orders');
-        gttOrders = await response.json();
-        renderGttTable();
-        updateTopSectionSummary(); // Add this line
-    } catch (error) {
-        console.error('Error loading GTT orders:', error);
-        setEmpty('gttContent', 'Error loading GTT orders');
-    }
-}
 
 
 // ========== WALLET FUNCTIONS ===========

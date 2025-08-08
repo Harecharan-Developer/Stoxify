@@ -391,7 +391,7 @@
     <i class="fas fa-minus-circle me-2"></i>Withdraw Money
   </a></li>
   <li><hr class="dropdown-divider"></li>
-  <li><a class="dropdown-item text-danger" href="#" onclick="logout()">
+  <li><a class="dropdown-item text-danger" href="userlogin.html" onclick="logout()">
     <i class="fas fa-sign-out-alt me-2"></i>Logout
   </a></li>
 </ul>
@@ -538,22 +538,27 @@
                 </div>
               </div>
 
-              <!-- GTT Orders Tab -->
-              <div class="tab-pane fade" id="gtt" role="tabpanel">
-                <div class="table-container">
-                  <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h5 class="mb-0"><i class="fas fa-clock me-2"></i>GTT Orders</h5>
-                    <button class="btn btn-outline-primary" onclick="loadGTTOrders()">
-                      <i class="fas fa-refresh me-2"></i>Refresh
-                    </button>
-                  </div>
-                  <div id="gttContent">
-                    <div class="loading">
-                      <div class="spinner"></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+<!-- GTT Orders Tab -->
+<div class="tab-pane fade" id="gtt" role="tabpanel">
+  <div class="table-container">
+    <!-- <div class="d-flex justify-content-between align-items-center mb-3">
+      <h5 class="mb-0"><i class="fas fa-clock me-2"></i>GTT Orders</h5>
+      <div>
+        <button class="btn btn-outline-primary me-2" onclick="loadGttOrders()">
+          <i class="fas fa-refresh me-2"></i>Refresh
+        </button>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#gttModal">
+          <i class="fas fa-plus me-2"></i>Create GTT
+        </button>
+      </div>
+    </div> -->
+    <div id="gttContent">
+      <div class="loading">
+        <div class="spinner"></div>
+      </div>
+    </div>
+  </div>
+</div>
 
             </div>
           </div>
