@@ -361,6 +361,26 @@
       }
     }
   </style>
+  <style>
+    .btn-outline-success {
+      border: none;
+      border-radius: 8px;
+      padding: 0.5rem 1rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.8rem;
+      letter-spacing: 1px;
+      transition: all 0.3s ease;
+      margin: 0 0.2rem;
+      background: linear-gradient(135deg, #28a745, #20c997);
+      color: white;
+    }
+    .btn-outline-success:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+      color: white;
+    }
+  </style>
 </head>
 <body>
   <!-- Navigation -->
@@ -468,6 +488,9 @@
                 <div class="table-container">
                   <div class="d-flex justify-content-between align-items-center mb-3">
                     <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>All Stocks</h5>
+                    <button class="btn btn-outline-success me-2" onclick="location.href='analysis.html'">
+                      <i class="fas fa-chart-pie me-2"></i>Analysis
+                    </button>
                     <button class="btn btn-outline-primary" onclick="loadAllStocks()">
                       <i class="fas fa-refresh me-2"></i>Refresh
                     </button>
@@ -706,6 +729,8 @@
       }
       return null;
     }
+
+    
     
     // ======= Loading All Tables at Startup =======
     async function loadAllDataTables() {
